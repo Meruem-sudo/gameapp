@@ -1,0 +1,294 @@
+<title>Bozzetti del Cavaliere</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@700;800&family=Alegreya+Sans:wght@400;500;700&display=swap">
+<style>
+  /* Layout: tavola di bozzetti, una griglia di carte "pergamena", ogni carta = un concept con scheda tecnica */
+  :root {
+    --bg: #efe9dd; --surface: #fbf8f2; --ink: #26221c; --muted: #6c6356; --line: #d8cfbf; --accent: #9a3d1f;
+    --stage: #e4ddcd;
+    --display: "Alegreya SC", Georgia, serif;
+    --body: "Alegreya Sans", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #17150f; --surface: #221f18; --ink: #efe8da; --muted: #a89e8c; --line: #3a352a; --accent: #e0855e; --stage: #2c2820; color-scheme: dark } }
+  :root[data-theme="dark"] {
+    --bg: #17150f; --surface: #221f18; --ink: #efe8da; --muted: #a89e8c; --line: #3a352a; --accent: #e0855e; --stage: #2c2820; color-scheme: dark }
+
+  body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.5;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding-block: 40px 64px; display: grid; gap: 28px; }
+  header { display: grid; gap: 8px; max-width: 68ch; }
+  h1 { font-family: var(--display); font-size: clamp(30px, 5vw, 46px); line-height: 1.05; margin: 0; text-wrap: balance; }
+  header p { margin: 0; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 20px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; display: grid; grid-template-rows: auto 1fr; overflow: hidden; }
+  .stage { background: var(--stage); aspect-ratio: 1 / 1; max-width: 100%; display: grid; place-items: center; border-bottom: 1px solid var(--line); }
+  .stage svg { width: 78%; height: 78%; }
+  .stage.full svg { width: 100%; height: 100%; }
+  .info { padding: 16px 18px 20px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+  .tag { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+  h2 { font-family: var(--display); font-size: 24px; margin: 0; line-height: 1.1; }
+  .info p { margin: 0; }
+  dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 14px; }
+  dt { color: var(--muted); }
+  dd { margin: 0; }
+  .meter { display: inline-flex; gap: 3px; vertical-align: middle; }
+  .meter i { width: 14px; height: 6px; border-radius: 2px; background: var(--line); }
+  .meter i.on { background: var(--accent); }
+  .note { border-top: 1px solid var(--line); padding-top: 20px; max-width: 72ch; display: grid; gap: 8px; }
+  .note h3 { font-family: var(--display); margin: 0; font-size: 20px; }
+  .note p { margin: 0; }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="tag">Last Line · personaggio</span>
+    <h1>Sei bozzetti per il cavaliere</h1>
+    <p>Tutti di profilo e rivolti a destra, perché il gioco scorre in orizzontale. Sono disegni originali: ho evitato di proposito i colori rosso e bianco, l'elmo argento col pennacchio e lo scudo con l'emblema del cavaliere di Defenders &amp; Dragons.</p>
+  </header>
+
+  <div class="grid">
+
+    <!-- 1 CHIBI -->
+    <article class="card">
+      <div class="stage">
+        <svg viewBox="0 0 200 200" role="img" aria-label="Cavaliere chibi con elmo enorme">
+          <ellipse cx="100" cy="184" rx="44" ry="6" fill="#00000026"/>
+          <path d="M48 120 h32 v22 c0 14 -16 22 -16 22 c0 0 -16 -8 -16 -22z" fill="#e0a83a" stroke="#9a6d1d" stroke-width="3"/>
+          <g transform="rotate(22 140 150)">
+            <rect x="135" y="62" width="10" height="76" rx="3" fill="#eef2f7" stroke="#6b7a90" stroke-width="2"/>
+            <rect x="125" y="136" width="30" height="7" rx="3" fill="#e0a83a"/>
+            <rect x="136" y="143" width="8" height="16" rx="2" fill="#7a4a2a"/>
+          </g>
+          <rect x="80" y="150" width="16" height="28" rx="5" fill="#6b7a90"/>
+          <rect x="104" y="150" width="16" height="28" rx="5" fill="#6b7a90"/>
+          <rect x="76" y="172" width="22" height="10" rx="4" fill="#3b4558"/>
+          <rect x="102" y="172" width="25" height="10" rx="4" fill="#3b4558"/>
+          <rect x="70" y="114" width="60" height="46" rx="16" fill="#3a6fd8"/>
+          <path d="M90 118 h20 v26 l-10 7 l-10 -7z" fill="#e0a83a"/>
+          <circle cx="138" cy="150" r="9" fill="#c7d1e0" stroke="#6b7a90" stroke-width="2"/>
+          <circle cx="100" cy="76" r="48" fill="#c7d1e0"/>
+          <path d="M60 96 a48 48 0 0 0 80 6 a54 54 0 0 1 -80 -6z" fill="#a4b0c2"/>
+          <rect x="108" y="66" width="40" height="12" rx="6" fill="#1d2433"/>
+          <circle cx="134" cy="72" r="3" fill="#7fd1ff"/>
+          <path d="M96 30 C 82 6, 50 10, 44 32 C 60 22, 78 26, 92 38 Z" fill="#3a6fd8"/>
+        </svg>
+      </div>
+      <div class="info">
+        <span class="tag">Cartoon chibi</span>
+        <h2>Ser Testone</h2>
+        <p>Elmo enorme e corpo piccolo, visiera a fessura con un riflesso al posto degli occhi. Acciaio azzurrino, blu e oro.</p>
+        <dl>
+          <dt>Leggibilità</dt><dd>Ottima anche su schermi piccoli: la testa grande si riconosce subito</dd>
+          <dt>Animazione</dt><dd><span class="meter"><i class="on"></i><i class="on"></i><i></i></span> media</dd>
+          <dt>Rischio</dt><dd>Stile molto diffuso tra i giochi mobile, quindi si nota meno</dd>
+        </dl>
+      </div>
+    </article>
+
+    <!-- 2 PIXEL -->
+    <article class="card">
+      <div class="stage">
+        <svg id="pixel" viewBox="0 0 16 16" shape-rendering="crispEdges" role="img" aria-label="Cavaliere in pixel art"></svg>
+      </div>
+      <div class="info">
+        <span class="tag">Pixel art 16×16</span>
+        <h2>Il Custode</h2>
+        <p>Retrò, pochi colori: verde bosco, oro e un pennacchio viola. Ogni pixel conta, quindi deve funzionare anche ingrandito tre o quattro volte.</p>
+        <dl>
+          <dt>Leggibilità</dt><dd>Buona se ingrandito a multipli interi, si rovina se scalato male</dd>
+          <dt>Animazione</dt><dd><span class="meter"><i class="on"></i><i class="on"></i><i></i></span> fotogramma per fotogramma, 4-6 frame a mossa</dd>
+          <dt>Rischio</dt><dd>Sembra amatoriale se gli sfondi non sono dello stesso stile</dd>
+        </dl>
+      </div>
+    </article>
+
+    <!-- 3 FLAT GEOMETRICO -->
+    <article class="card">
+      <div class="stage">
+        <svg viewBox="0 0 200 200" role="img" aria-label="Cavaliere geometrico con mani fluttuanti">
+          <ellipse cx="100" cy="186" rx="36" ry="5" fill="#00000026"/>
+          <circle cx="56" cy="132" r="21" fill="#ff7a59"/>
+          <circle cx="56" cy="132" r="8" fill="#e8e4da"/>
+          <path d="M72 112 L128 112 L138 166 L62 166 Z" fill="#1f9e89"/>
+          <rect x="62" y="158" width="76" height="8" fill="#13705f"/>
+          <rect x="70" y="173" width="22" height="9" rx="4.5" fill="#26323f"/>
+          <rect x="108" y="173" width="22" height="9" rx="4.5" fill="#26323f"/>
+          <path d="M74 110 V70 a26 26 0 0 1 52 0 V110 Z" fill="#e8e4da"/>
+          <rect x="104" y="80" width="22" height="7" fill="#26323f"/>
+          <path d="M100 45 L100 22 L126 33 Z" fill="#ff7a59"/>
+          <rect x="99" y="22" width="3" height="24" fill="#26323f"/>
+          <rect x="147" y="56" width="7" height="64" fill="#e8e4da" stroke="#26323f" stroke-width="2"/>
+          <rect x="137" y="118" width="27" height="6" fill="#26323f"/>
+          <circle cx="150.5" cy="132" r="8" fill="#e8e4da" stroke="#26323f" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="info">
+        <span class="tag">Flat geometrico</span>
+        <h2>Pedina</h2>
+        <p>Solo forme base: trapezio, cupola, cerchi. Niente braccia: mani, scudo e spada fluttuano, quindi si animano spostandoli e basta.</p>
+        <dl>
+          <dt>Leggibilità</dt><dd>Molto pulita, pochi dettagli che si perdono</dd>
+          <dt>Animazione</dt><dd><span class="meter"><i class="on"></i><i></i><i></i></span> la più facile, si disegna direttamente nel codice</dd>
+          <dt>Rischio</dt><dd>Poco "fantasy": più puzzle game che avventura</dd>
+        </dl>
+      </div>
+    </article>
+
+    <!-- 4 CONTORNO SPESSO -->
+    <article class="card">
+      <div class="stage">
+        <svg viewBox="0 0 200 200" role="img" aria-label="Cavaliere cartoon con contorno nero spesso">
+          <ellipse cx="100" cy="186" rx="44" ry="6" fill="#00000026"/>
+          <g stroke="#1b1b24" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+            <path d="M151 146 L174 60 L184 64 L161 150 Z" fill="#eef2f6"/>
+            <path d="M139 140 L176 151" fill="none" stroke-width="9"/>
+            <path d="M139 140 L176 151" fill="none" stroke="#c98a2b" stroke-width="3"/>
+            <path d="M82 150 V176 H72 V184 H98 V150 Z" fill="#6d4a2f"/>
+            <path d="M104 150 V184 H132 V176 H120 V150 Z" fill="#6d4a2f"/>
+            <path d="M70 108 H130 L136 160 H64 Z" fill="#3e9b4f"/>
+            <path d="M64 146 H136" fill="none"/>
+            <path d="M70 108 V58 Q100 34 130 58 V108 Z" fill="#b9c2cc"/>
+            <path d="M104 74 H130 M117 64 V92" fill="none"/>
+            <path d="M40 112 H80 V142 Q80 164 60 172 Q40 164 40 142 Z" fill="#f2c14e"/>
+            <path d="M60 114 V170" fill="none"/>
+            <circle cx="154" cy="146" r="10" fill="#b9c2cc"/>
+          </g>
+        </svg>
+      </div>
+      <div class="info">
+        <span class="tag">Cartoon a contorno</span>
+        <h2>Bertoldo</h2>
+        <p>Elmo a secchio con visiera a croce, tabarro verde, scudo giallo, contorno nero spesso. Lo stile più vicino al genere dei giochi a ondate fantasy, ma con una sagoma diversa.</p>
+        <dl>
+          <dt>Leggibilità</dt><dd>La migliore su sfondi pieni di cose, grazie al contorno</dd>
+          <dt>Animazione</dt><dd><span class="meter"><i class="on"></i><i class="on"></i><i></i></span> media, con pezzi separati (vedi bozzetto 6)</dd>
+          <dt>Rischio</dt><dd>Serve coerenza: anche nemici e sfondi col contorno</dd>
+        </dl>
+      </div>
+    </article>
+
+    <!-- 5 SILHOUETTE -->
+    <article class="card">
+      <div class="stage full">
+        <svg viewBox="0 0 200 200" role="img" aria-label="Sagoma nera di cavaliere controluce al tramonto">
+          <defs>
+            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#3b1d5e"/><stop offset="1" stop-color="#ff8a4c"/>
+            </linearGradient>
+          </defs>
+          <rect width="200" height="200" fill="url(#sky)"/>
+          <circle cx="56" cy="72" r="28" fill="#ffd9a0" opacity=".85"/>
+          <rect y="178" width="200" height="22" fill="#120a1c"/>
+          <g fill="#120a1c">
+            <path d="M80 104 C 54 120, 40 150, 28 178 L 92 178 L 96 108 Z"/>
+            <path d="M78 100 H122 L126 160 H74 Z"/>
+            <rect x="80" y="156" width="14" height="24"/>
+            <rect x="104" y="156" width="14" height="24"/>
+            <path d="M78 100 V64 Q100 44 122 64 V100 Z"/>
+            <path d="M98 50 L92 26 L106 48 Z"/>
+            <path d="M116 112 L142 118 L142 127 L114 124 Z"/>
+            <rect x="139" y="96" width="6" height="84"/>
+            <rect x="129" y="108" width="26" height="6"/>
+          </g>
+          <rect x="104" y="74" width="18" height="5" rx="2" fill="#5ff2ff"/>
+        </svg>
+      </div>
+      <div class="info">
+        <span class="tag">Silhouette</span>
+        <h2>L'Ombra</h2>
+        <p>Sagoma nera controluce con un solo dettaglio luminoso, la visiera. Mantello che sventola. Atmosfera cupa e d'impatto.</p>
+        <dl>
+          <dt>Leggibilità</dt><dd>Forte la sagoma, ma i nemici devono restare distinguibili</dd>
+          <dt>Animazione</dt><dd><span class="meter"><i class="on"></i><i></i><i></i></span> bassa, i dettagli interni non servono</dd>
+          <dt>Rischio</dt><dd>Se tutto è nero, in una mischia affollata non si capisce cosa succede</dd>
+        </dl>
+      </div>
+    </article>
+
+    <!-- 6 CUTOUT -->
+    <article class="card">
+      <div class="stage">
+        <svg viewBox="0 0 200 200" role="img" aria-label="Cavaliere a pezzi di carta con perni alle giunture">
+          <defs>
+            <filter id="paper" x="-10%" y="-10%" width="130%" height="130%">
+              <feDropShadow dx="2" dy="2" stdDeviation="0" flood-color="#000" flood-opacity=".22"/>
+            </filter>
+          </defs>
+          <ellipse cx="100" cy="186" rx="40" ry="5" fill="#00000026"/>
+          <g filter="url(#paper)">
+            <rect x="70" y="118" width="14" height="38" rx="7" fill="#5e6b5a" transform="rotate(20 77 120)"/>
+            <rect x="86" y="150" width="16" height="32" rx="6" fill="#5e6b5a" transform="rotate(-10 94 152)"/>
+            <path d="M74 108 H126 L120 158 H80 Z" fill="#9a6440"/>
+            <rect x="100" y="150" width="16" height="32" rx="6" fill="#7a8a76" transform="rotate(12 108 152)"/>
+            <g transform="rotate(-6 100 106)">
+              <rect x="76" y="58" width="50" height="50" rx="14" fill="#b4b1a4"/>
+              <rect x="104" y="76" width="22" height="6" fill="#2c2a26"/>
+            </g>
+            <g transform="rotate(15 150 140)">
+              <rect x="147" y="64" width="6" height="70" fill="#dcd8cc"/>
+              <rect x="138" y="130" width="24" height="5" fill="#6b4a2a"/>
+            </g>
+            <rect x="114" y="114" width="14" height="38" rx="7" fill="#7a8a76" transform="rotate(-50 121 116)"/>
+          </g>
+          <g fill="#d4a017">
+            <circle cx="77" cy="120" r="3"/><circle cx="94" cy="152" r="3"/><circle cx="108" cy="152" r="3"/>
+            <circle cx="121" cy="116" r="3"/><circle cx="100" cy="106" r="3"/>
+          </g>
+        </svg>
+      </div>
+      <div class="info">
+        <span class="tag">Marionetta di carta</span>
+        <h2>Il Fante di Cartone</h2>
+        <p>Pezzi ritagliati uniti da perni dorati. È anche una tecnica: qualunque bozzetto sopra si può dividere così e animare ruotando i pezzi nel codice, senza disegnare ogni frame.</p>
+        <dl>
+          <dt>Leggibilità</dt><dd>Buona, look artigianale e caldo</dd>
+          <dt>Animazione</dt><dd><span class="meter"><i class="on"></i><i class="on"></i><i></i></span> fluida, pochi disegni da fare</dd>
+          <dt>Rischio</dt><dd>Le giunture si vedono quando i pezzi ruotano molto</dd>
+        </dl>
+      </div>
+    </article>
+  </div>
+
+  <section class="note">
+    <h3>Cosa conta per la scelta</h3>
+    <p>Il cavaliere misurerà circa 60-90 pixel di altezza sullo schermo del telefono. A quella dimensione contano solo sagoma e due-tre colori: i dettagli fini (emblemi, rivetti) spariscono.</p>
+    <p>Il mio consiglio è il 4 (contorno spesso) realizzato con la tecnica del 6 (pezzi separati). Così posso disegnarlo e animarlo direttamente nel codice: camminata, fendente, parata e colpo subito, senza grafica esterna. Il pixel art (2) è l'alternativa se preferisci un look retrò, ma richiede disegnare a mano ogni fotogramma.</p>
+  </section>
+</div>
+
+<script>
+  (function () {
+    var map = [
+      "................",
+      ".......PP.......",
+      "......PPP....S..",
+      "....HHHHHH...S..",
+      "...HHHHHHHH..S..",
+      "...hHHHHVVV..S..",
+      "...hHHHHHHH..S..",
+      "....hHHHHH..GGG.",
+      "..DDDTTTTTAAA...",
+      "..DGDTTGTTTA....",
+      "..DGDTGGGTT.....",
+      "..DDDBBBBBB.....",
+      "...D.TTTTTT.....",
+      ".....LL..LL.....",
+      ".....LL..LL.....",
+      "....FFF..FFF...."
+    ];
+    var pal = { P: "#7b4fd9", H: "#c9d1de", h: "#8a95a8", V: "#1a1f2b", S: "#e6edf5", G: "#f0c04a",
+      T: "#2f7d6b", A: "#a9b3c2", D: "#2f7d6b", B: "#6b4a2a", L: "#5b6474", F: "#3a3f4b" };
+    var svg = document.getElementById("pixel"), ns = "http://www.w3.org/2000/svg";
+    map.forEach(function (row, y) {
+      for (var x = 0; x < row.length; x++) {
+        var c = pal[row[x]];
+        if (!c) continue;
+        var r = document.createElementNS(ns, "rect");
+        r.setAttribute("x", x); r.setAttribute("y", y); r.setAttribute("width", 1); r.setAttribute("height", 1);
+        r.setAttribute("fill", c);
+        svg.appendChild(r);
+      }
+    });
+  })();
+</script>
