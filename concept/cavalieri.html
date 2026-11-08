@@ -2,293 +2,371 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@700;800&family=Alegreya+Sans:wght@400;500;700&display=swap">
 <style>
-  /* Layout: tavola di bozzetti, una griglia di carte "pergamena", ogni carta = un concept con scheda tecnica */
+  /* Layout: tre tavole grandi (dettaglio) + una striscia "in gioco" a dimensione reale */
   :root {
-    --bg: #efe9dd; --surface: #fbf8f2; --ink: #26221c; --muted: #6c6356; --line: #d8cfbf; --accent: #9a3d1f;
-    --stage: #e4ddcd;
+    --bg: #efe9dd; --surface: #fbf8f2; --ink: #26221c; --muted: #6c6356; --line: #d8cfbf; --accent: #8a4b1c;
+    --stage: #e2dccf;
     --display: "Alegreya SC", Georgia, serif;
     --body: "Alegreya Sans", system-ui, sans-serif;
   }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-    --bg: #17150f; --surface: #221f18; --ink: #efe8da; --muted: #a89e8c; --line: #3a352a; --accent: #e0855e; --stage: #2c2820; color-scheme: dark } }
+    --bg: #17150f; --surface: #221f18; --ink: #efe8da; --muted: #a89e8c; --line: #3a352a; --accent: #e09a5e; --stage: #2e2a22; color-scheme: dark } }
   :root[data-theme="dark"] {
-    --bg: #17150f; --surface: #221f18; --ink: #efe8da; --muted: #a89e8c; --line: #3a352a; --accent: #e0855e; --stage: #2c2820; color-scheme: dark }
+    --bg: #17150f; --surface: #221f18; --ink: #efe8da; --muted: #a89e8c; --line: #3a352a; --accent: #e09a5e; --stage: #2e2a22; color-scheme: dark }
 
   body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.5;
     padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-  .wrap { max-width: 1120px; margin: 0 auto; padding-block: 40px 64px; display: grid; gap: 28px; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding-block: 40px 64px; display: grid; gap: 32px; }
   header { display: grid; gap: 8px; max-width: 68ch; }
   h1 { font-family: var(--display); font-size: clamp(30px, 5vw, 46px); line-height: 1.05; margin: 0; text-wrap: balance; }
-  header p { margin: 0; color: var(--muted); }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 20px; }
-  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; display: grid; grid-template-rows: auto 1fr; overflow: hidden; }
-  .stage { background: var(--stage); aspect-ratio: 1 / 1; max-width: 100%; display: grid; place-items: center; border-bottom: 1px solid var(--line); }
-  .stage svg { width: 78%; height: 78%; }
-  .stage.full svg { width: 100%; height: 100%; }
-  .info { padding: 16px 18px 20px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+  header p, .note p { margin: 0; }
+  header p { color: var(--muted); }
   .tag { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 20px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; }
+  .stage { background: radial-gradient(circle at 50% 40%, var(--surface), var(--stage) 75%); aspect-ratio: 22 / 30; max-width: 100%;
+    display: grid; place-items: center; border-bottom: 1px solid var(--line); }
+  .stage svg { width: 88%; height: 88%; }
+  .info { padding: 16px 18px 20px; display: grid; gap: 10px; align-content: start; min-width: 0; }
   h2 { font-family: var(--display); font-size: 24px; margin: 0; line-height: 1.1; }
+  .era { color: var(--muted); font-size: 14px; }
   .info p { margin: 0; }
-  dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 14px; }
-  dt { color: var(--muted); }
-  dd { margin: 0; }
-  .meter { display: inline-flex; gap: 3px; vertical-align: middle; }
-  .meter i { width: 14px; height: 6px; border-radius: 2px; background: var(--line); }
-  .meter i.on { background: var(--accent); }
+  .ingame { display: grid; gap: 12px; }
+  .ingame h3, .note h3 { font-family: var(--display); margin: 0; font-size: 22px; }
+  .strip { border-radius: 6px; overflow: hidden; border: 1px solid var(--line); }
+  .strip svg { display: block; width: 100%; height: auto; }
+  .ingame p { margin: 0; color: var(--muted); font-size: 14px; max-width: 72ch; }
   .note { border-top: 1px solid var(--line); padding-top: 20px; max-width: 72ch; display: grid; gap: 8px; }
-  .note h3 { font-family: var(--display); margin: 0; font-size: 20px; }
-  .note p { margin: 0; }
 </style>
+
+<!-- definizioni condivise: gradienti, maglia di ferro, i tre cavalieri come simboli -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="steel" x1="0" x2="1">
+      <stop offset="0" stop-color="#f3f6f9"/><stop offset=".3" stop-color="#c9d1da"/>
+      <stop offset=".62" stop-color="#7c8794"/><stop offset=".8" stop-color="#aab4bf"/><stop offset="1" stop-color="#4a535e"/>
+    </linearGradient>
+    <linearGradient id="steelV" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f3f6f9"/><stop offset=".4" stop-color="#b9c2cc"/><stop offset="1" stop-color="#58626e"/>
+    </linearGradient>
+    <linearGradient id="blade" x1="0" x2="1">
+      <stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#d5dce4"/><stop offset=".55" stop-color="#8d98a5"/><stop offset="1" stop-color="#c3cbd4"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff0b8"/><stop offset=".45" stop-color="#d9a940"/><stop offset="1" stop-color="#7d5913"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" x2="1">
+      <stop offset="0" stop-color="#3561ad"/><stop offset=".55" stop-color="#1d3a74"/><stop offset="1" stop-color="#0f2048"/>
+    </linearGradient>
+    <linearGradient id="teal" x1="0" x2="1">
+      <stop offset="0" stop-color="#2f7f78"/><stop offset="1" stop-color="#123c3a"/>
+    </linearGradient>
+    <linearGradient id="wine" x1="0" x2="1">
+      <stop offset="0" stop-color="#7d2f42"/><stop offset="1" stop-color="#36111c"/>
+    </linearGradient>
+    <linearGradient id="leather" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7a4f2c"/><stop offset="1" stop-color="#3b2413"/>
+    </linearGradient>
+    <linearGradient id="shadeR" x1="0" x2="1">
+      <stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/>
+    </linearGradient>
+    <radialGradient id="gloss" cx=".32" cy=".25" r=".85">
+      <stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".4" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity=".4"/>
+    </radialGradient>
+    <pattern id="mail" width="4" height="3" patternUnits="userSpaceOnUse">
+      <rect width="4" height="3" fill="#86909c"/>
+      <path d="M0 3 A2 2 0 0 1 4 3" fill="none" stroke="#353b44" stroke-width=".8"/>
+      <circle cx="2" cy="1.3" r=".6" fill="#d3dae2"/>
+    </pattern>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6fa8d6"/><stop offset="1" stop-color="#cfe4ef"/>
+    </linearGradient>
+
+    <!-- ============ A: CROCIATO ============ -->
+    <symbol id="kA" viewBox="0 0 220 300">
+      <ellipse cx="114" cy="291" rx="62" ry="7" fill="#000" opacity=".25"/>
+      <g stroke="#15171c" stroke-width="1.6" stroke-linejoin="round">
+        <!-- gamba dietro -->
+        <path d="M90 200 L110 200 L106 232 L103 276 L116 281 L117 290 L84 290 L86 276 L86 232 Z" fill="url(#mail)"/>
+        <path d="M90 200 L110 200 L106 232 L103 276 L116 281 L117 290 L84 290 L86 276 L86 232 Z" fill="#000" opacity=".3" stroke="none"/>
+        <ellipse cx="96" cy="232" rx="10" ry="8" fill="url(#steel)"/>
+        <!-- gamba davanti -->
+        <path d="M114 200 L134 200 L140 230 L143 276 L160 282 L161 291 L124 291 L124 276 L120 232 Z" fill="url(#mail)"/>
+        <path d="M114 200 L134 200 L140 230 L143 276 L160 282 L161 291 L124 291 L124 276 L120 232 Z" fill="url(#shadeR)" stroke="none"/>
+        <ellipse cx="131" cy="230" rx="11" ry="9" fill="url(#steel)"/>
+        <path d="M124 286 L113 284" stroke="url(#gold)" stroke-width="2.4" fill="none"/>
+        <circle cx="111" cy="284" r="2.4" fill="url(#gold)" stroke-width="1"/>
+        <!-- braccio lontano -->
+        <path d="M130 98 L148 102 L170 146 L158 156 L136 120 Z" fill="url(#mail)"/>
+        <path d="M130 98 L148 102 L170 146 L158 156 L136 120 Z" fill="#000" opacity=".35" stroke="none"/>
+        <!-- sopravveste -->
+        <path d="M76 94 Q110 84 144 94 L148 150 L156 226 Q134 234 114 226 L111 214 L108 226 Q90 234 66 226 L74 150 Z" fill="url(#blue)"/>
+      </g>
+      <g fill="none" stroke-linecap="round">
+        <g stroke="#0a1633" stroke-width="1.6" opacity=".75">
+          <path d="M84 160 Q82 196 78 224"/><path d="M98 160 Q99 196 95 228"/><path d="M128 160 Q130 196 134 228"/><path d="M142 160 Q146 196 150 226"/>
+        </g>
+        <g stroke="#5b86d1" stroke-width="1" opacity=".6">
+          <path d="M87 162 Q85 196 82 222"/><path d="M131 162 Q133 196 137 226"/>
+        </g>
+        <path d="M66 226 Q90 234 108 226 M114 226 Q134 234 156 226" stroke="url(#gold)" stroke-width="2.6"/>
+      </g>
+      <g stroke="#15171c" stroke-width="1.6" stroke-linejoin="round">
+        <!-- cintura -->
+        <path d="M74 148 Q110 156 148 148 L148 156 Q110 164 74 156 Z" fill="url(#leather)"/>
+        <rect x="104" y="150" width="10" height="9" rx="1.5" fill="url(#gold)" stroke-width="1"/>
+        <!-- camaglio -->
+        <path d="M82 76 Q107 90 134 76 L138 98 Q108 106 78 98 Z" fill="url(#mail)"/>
+        <path d="M82 76 Q107 90 134 76 L138 98 Q108 106 78 98 Z" fill="url(#shadeR)" stroke="none"/>
+        <!-- elmo a secchio -->
+        <path d="M84 38 Q107 24 132 38 L134 80 Q108 90 82 80 Z" fill="url(#steel)"/>
+        <path d="M84 38 Q107 24 132 38 Q107 46 84 38 Z" fill="#e4e9ef"/>
+        <path d="M115 41 L120 41 L120 86 L115 86 Z" fill="url(#gold)" stroke-width="1"/>
+        <path d="M98 56 L133 55 L133 60 L98 61 Z" fill="url(#gold)" stroke-width="1"/>
+      </g>
+      <path d="M100 50 L114 50 L114 54.5 L100 55 Z M121 49.5 L133 49 L133 54 L121 54.5 Z" fill="#0b0d11"/>
+      <g fill="#0b0d11"><circle cx="125" cy="66" r="1.3"/><circle cx="129.5" cy="66" r="1.3"/><circle cx="125" cy="71" r="1.3"/><circle cx="129.5" cy="71" r="1.3"/><circle cx="127.2" cy="76" r="1.3"/></g>
+      <g fill="#f5f7fa"><circle cx="88" cy="80" r="1.1"/><circle cx="96" cy="83" r="1.1"/><circle cx="104" cy="85" r="1.1"/><circle cx="124" cy="84" r="1.1"/><circle cx="131" cy="81" r="1.1"/></g>
+      <path d="M90 42 Q92 60 90 78" stroke="#fff" stroke-width="2.6" opacity=".65" fill="none" stroke-linecap="round"/>
+      <!-- scudo -->
+      <g stroke-linejoin="round">
+        <path d="M92 104 Q122 96 152 104 L152 140 Q150 184 122 212 Q94 184 92 140 Z" fill="url(#blue)" stroke="#15171c" stroke-width="1.8"/>
+        <path d="M96 107.5 Q122 100.5 148 107.5 L148 140 Q146 180 122 206 Q98 180 96 140 Z" fill="none" stroke="url(#gold)" stroke-width="2.2"/>
+        <path d="M100 170 L122 136 L144 170 L136 175 L122 153 L108 175 Z" fill="url(#gold)" stroke="#5c430f" stroke-width="1"/>
+        <g fill="url(#gold)" stroke="#5c430f" stroke-width="1"><circle cx="108" cy="122" r="5.5"/><circle cx="136" cy="122" r="5.5"/><circle cx="122" cy="190" r="5"/></g>
+        <path d="M92 104 Q122 96 152 104 L152 140 Q150 184 122 212 Q94 184 92 140 Z" fill="url(#gloss)"/>
+        <g stroke="#fff" stroke-opacity=".35" stroke-width=".8" fill="none"><path d="M104 146 l9 -4"/><path d="M134 186 l6 -7"/><path d="M140 132 l5 3"/></g>
+      </g>
+      <!-- spada e guanto -->
+      <g transform="rotate(6 161 150)" stroke="#15171c" stroke-linejoin="round">
+        <path d="M157.5 141 L157.5 34 L161 20 L164.5 34 L164.5 141 Z" fill="url(#blade)" stroke-width="1.2"/>
+        <path d="M161 38 L161 136" stroke="#6f7a87" stroke-width="1.4"/>
+        <path d="M143 139 Q161 135 179 139 L179 145 Q161 141 143 145 Z" fill="url(#gold)" stroke-width="1"/>
+        <rect x="158" y="145" width="6" height="20" fill="url(#leather)" stroke-width="1"/>
+        <circle cx="161" cy="169" r="5.5" fill="url(#gold)" stroke-width="1"/>
+      </g>
+      <path d="M151 147 Q161 142 171 147 L172 161 Q161 166 151 161 Z" fill="url(#steel)" stroke="#15171c" stroke-width="1.6"/>
+      <path d="M154 152 Q161 149 169 152 M154 156.5 Q161 153.5 169 156.5" stroke="#3d454f" stroke-width=".9" fill="none"/>
+    </symbol>
+
+    <!-- ============ B: ARMATURA GOTICA ============ -->
+    <symbol id="kB" viewBox="0 0 220 300">
+      <ellipse cx="118" cy="291" rx="64" ry="7" fill="#000" opacity=".25"/>
+      <!-- mantello -->
+      <path d="M86 96 Q60 140 50 200 Q44 240 52 272 Q70 262 84 270 Q90 220 98 160 Z" fill="url(#teal)" stroke="#0d1716" stroke-width="1.6" stroke-linejoin="round"/>
+      <g stroke="#0a2422" stroke-width="1.4" fill="none" opacity=".8"><path d="M78 130 Q66 190 64 262"/><path d="M90 140 Q80 200 76 266"/></g>
+      <path d="M52 272 Q70 262 84 270" stroke="url(#gold)" stroke-width="2.2" fill="none"/>
+      <!-- lama dietro il corpo -->
+      <g transform="translate(138 106) rotate(-66.8)" stroke="#15171c" stroke-linejoin="round">
+        <path d="M-3.6 0 L-3.6 -112 L0 -124 L3.6 -112 L3.6 0 Z" fill="url(#blade)" stroke-width="1.2"/>
+        <path d="M0 -6 L0 -104" stroke="#6f7a87" stroke-width="1.3"/>
+      </g>
+      <g stroke="#15171c" stroke-width="1.6" stroke-linejoin="round">
+        <!-- gamba dietro -->
+        <g>
+          <path d="M90 166 L112 166 L106 222 L86 222 Z" fill="url(#steel)"/>
+          <path d="M87 232 L105 232 L103 272 L89 272 Z" fill="url(#steel)"/>
+          <path d="M86 270 L104 270 Q114 278 130 289 L86 290 Z" fill="url(#steelV)"/>
+          <ellipse cx="96" cy="227" rx="11" ry="8" fill="url(#steel)"/>
+          <path d="M90 166 L112 166 L106 222 L86 222 Z M87 232 L105 232 L103 272 L89 272 Z M86 270 L104 270 Q114 278 130 289 L86 290 Z" fill="#000" opacity=".32" stroke="none"/>
+        </g>
+        <!-- gamba davanti -->
+        <path d="M114 166 L136 166 L140 220 L120 222 Z" fill="url(#steel)"/>
+        <path d="M120 234 L140 232 L144 272 L126 274 Z" fill="url(#steel)"/>
+        <path d="M124 270 L146 270 Q160 280 178 290 L122 291 Z" fill="url(#steelV)"/>
+        <path d="M140 272 L142 290 M152 278 L154 290 M163 284 L164 290" fill="none" stroke-width="1"/>
+        <ellipse cx="130" cy="227" rx="12" ry="9" fill="url(#steel)"/>
+        <path d="M119 222 Q110 228 116 238 Q120 232 124 230 Z" fill="url(#steel)" stroke-width="1.2"/>
+        <circle cx="131" cy="227" r="2" fill="url(#gold)" stroke-width=".8"/>
+        <!-- maglia all'inguine, scarselle -->
+        <path d="M98 160 L126 160 L124 184 L100 184 Z" fill="url(#mail)"/>
+        <path d="M84 160 L104 160 L102 188 L82 186 Z" fill="url(#steel)"/>
+        <path d="M118 160 L140 160 L142 190 L120 192 Z" fill="url(#steel)"/>
+        <path d="M82 186 L102 188 M120 192 L142 190" stroke="url(#gold)" stroke-width="2"/>
+        <!-- falde -->
+        <path d="M80 144 Q112 150 144 144 L145 152 Q112 158 79 152 Z" fill="url(#steel)"/>
+        <path d="M79 152 Q112 158 145 152 L146 160 Q112 166 78 160 Z" fill="url(#steel)"/>
+        <!-- petto -->
+        <path d="M80 98 Q112 88 142 98 Q150 120 144 146 L80 146 Q74 122 80 98 Z" fill="url(#steel)"/>
+      </g>
+      <g fill="none" stroke-linecap="round">
+        <g stroke="#3a424c" stroke-width="1.1"><path d="M98 100 Q103 124 108 145"/><path d="M114 97 Q117 122 118 145"/><path d="M130 99 Q133 124 130 145"/></g>
+        <g stroke="#fff" stroke-width="1" opacity=".7"><path d="M100 100 Q105 124 110 145"/><path d="M116 97 Q119 122 120 145"/></g>
+        <path d="M84 128 Q112 116 143 128" stroke="#15171c" stroke-width="1.4"/>
+        <path d="M84 128 Q112 116 143 128" stroke="url(#gold)" stroke-width="1.4" transform="translate(0 2)"/>
+        <path d="M80 98 Q112 88 142 98" stroke="url(#gold)" stroke-width="2"/>
+      </g>
+      <!-- braccio lontano -->
+      <path d="M128 100 L144 104 L160 120 L148 130 Z" fill="url(#steel)" stroke="#15171c" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M128 100 L144 104 L160 120 L148 130 Z" fill="#000" opacity=".35"/>
+      <!-- celata e barbozza -->
+      <g stroke="#15171c" stroke-width="1.6" stroke-linejoin="round">
+        <path d="M66 88 Q70 60 80 44 Q94 28 114 30 Q134 34 138 56 L138 64 Q124 68 108 66 Q96 74 84 82 Z" fill="url(#steel)"/>
+        <path d="M104 66 Q122 62 141 62 Q143 80 133 92 Q116 96 100 92 Z" fill="url(#steel)"/>
+      </g>
+      <path d="M114 50 L138 48 L138 53 L115 55 Z" fill="#0b0d11"/>
+      <path d="M96 46 Q118 40 138 46" stroke="#15171c" stroke-width="1.3" fill="none"/>
+      <path d="M104 66 Q122 62 141 62" stroke="url(#gold)" stroke-width="2" fill="none"/>
+      <circle cx="98" cy="50" r="2.6" fill="url(#gold)" stroke="#15171c" stroke-width=".8"/>
+      <path d="M86 46 Q98 34 116 34" stroke="#fff" stroke-width="2.6" opacity=".75" fill="none" stroke-linecap="round"/>
+      <g fill="#f5f7fa"><circle cx="72" cy="82" r="1.1"/><circle cx="78" cy="79" r="1.1"/><circle cx="110" cy="88" r="1.1"/><circle cx="122" cy="89" r="1.1"/></g>
+      <!-- spallaccio e braccio vicino -->
+      <g stroke="#15171c" stroke-width="1.6" stroke-linejoin="round">
+        <path d="M88 118 L106 118 L108 138 L92 140 Z" fill="url(#steel)"/>
+        <path d="M98 136 L106 148 L148 120 L140 110 Z" fill="url(#steel)"/>
+        <circle cx="101" cy="141" r="8" fill="url(#steel)"/>
+        <path d="M93 142 Q86 150 97 153 Q96 147 99 145 Z" fill="url(#steel)" stroke-width="1.2"/>
+        <path d="M76 96 Q86 84 104 90 Q114 100 110 118 Q96 124 80 120 Q70 110 76 96 Z" fill="url(#steel)"/>
+        <path d="M78 118 Q94 126 110 118 L110 124 Q94 132 80 126 Z" fill="url(#steel)"/>
+        <path d="M80 126 Q94 132 110 124 L109 130 Q94 138 81 132 Z" fill="url(#steel)"/>
+      </g>
+      <path d="M76 96 Q86 84 104 90" stroke="url(#gold)" stroke-width="2" fill="none"/>
+      <path d="M76 96 Q86 84 104 90 Q114 100 110 118 Q96 124 80 120 Q70 110 76 96 Z" fill="url(#gloss)"/>
+      <!-- elsa, impugnatura, guanti -->
+      <g transform="translate(138 106) rotate(-66.8)" stroke="#15171c" stroke-linejoin="round">
+        <path d="M-17 -2 Q0 -6 17 -2 L17 3 Q0 -1 -17 3 Z" fill="url(#gold)" stroke-width="1"/>
+        <rect x="-3" y="3" width="6" height="27" fill="url(#leather)" stroke-width="1"/>
+        <circle cx="0" cy="34" r="6" fill="url(#gold)" stroke-width="1"/>
+        <rect x="-8" y="5" width="16" height="10" rx="4" fill="url(#steel)" stroke-width="1.5"/>
+        <rect x="-8" y="17" width="16" height="10" rx="4" fill="url(#steel)" stroke-width="1.5"/>
+      </g>
+    </symbol>
+
+    <!-- ============ C: BACINETTO A BECCO ============ -->
+    <symbol id="kC" viewBox="0 0 220 300">
+      <ellipse cx="116" cy="291" rx="62" ry="7" fill="#000" opacity=".25"/>
+      <!-- mantello -->
+      <path d="M82 92 Q56 150 50 210 Q46 250 56 284 Q84 276 104 284 Q100 200 100 120 Z" fill="url(#wine)" stroke="#1a070d" stroke-width="1.6" stroke-linejoin="round"/>
+      <g stroke="#22080f" stroke-width="1.4" fill="none" opacity=".8"><path d="M76 130 Q64 200 66 278"/><path d="M90 140 Q82 210 86 280"/></g>
+      <path d="M56 284 Q84 276 104 284" stroke="url(#gold)" stroke-width="2.2" fill="none"/>
+      <g stroke="#15171c" stroke-width="1.6" stroke-linejoin="round">
+        <!-- gambe -->
+        <path d="M90 180 L110 180 L106 222 L88 222 Z" fill="url(#steel)"/>
+        <path d="M88 232 L105 232 L103 272 L90 272 Z" fill="url(#steel)"/>
+        <path d="M87 270 L104 270 Q112 278 124 289 L86 290 Z" fill="url(#steelV)"/>
+        <ellipse cx="97" cy="227" rx="10.5" ry="8" fill="url(#steel)"/>
+        <path d="M90 180 L110 180 L106 222 L88 222 Z M88 232 L105 232 L103 272 L90 272 Z M87 270 L104 270 Q112 278 124 289 L86 290 Z" fill="#000" opacity=".32" stroke="none"/>
+        <path d="M116 180 L136 180 L140 220 L121 222 Z" fill="url(#steel)"/>
+        <path d="M121 234 L140 232 L143 272 L127 274 Z" fill="url(#steel)"/>
+        <path d="M125 270 L145 270 Q156 280 170 290 L123 291 Z" fill="url(#steelV)"/>
+        <ellipse cx="131" cy="227" rx="11.5" ry="9" fill="url(#steel)"/>
+        <!-- braccio lontano -->
+        <path d="M128 104 L144 108 L158 144 L146 150 Z" fill="url(#steel)"/>
+        <path d="M128 104 L144 108 L158 144 L146 150 Z" fill="#000" opacity=".35" stroke="none"/>
+      </g>
+      <!-- giubba inquartata -->
+      <clipPath id="jup"><path d="M80 96 Q112 88 142 96 L146 150 L150 188 Q114 196 76 188 L78 150 Z"/></clipPath>
+      <g clip-path="url(#jup)">
+        <rect x="60" y="80" width="51" height="62" fill="#d6a43a"/>
+        <rect x="111" y="80" width="51" height="62" fill="#1d1b1f"/>
+        <rect x="60" y="142" width="51" height="60" fill="#1d1b1f"/>
+        <rect x="111" y="142" width="51" height="60" fill="#d6a43a"/>
+        <g stroke="#000" stroke-opacity=".28" stroke-width="1.2">
+          <path d="M86 90 V200 M96 90 V200 M106 90 V200 M116 90 V200 M126 90 V200 M136 90 V200"/>
+        </g>
+        <rect x="60" y="80" width="102" height="120" fill="url(#shadeR)"/>
+        <rect x="60" y="80" width="102" height="120" fill="url(#gloss)" opacity=".7"/>
+      </g>
+      <path d="M80 96 Q112 88 142 96 L146 150 L150 188 Q114 196 76 188 L78 150 Z" fill="none" stroke="#15171c" stroke-width="1.6" stroke-linejoin="round"/>
+      <!-- cintura cavalleresca -->
+      <path d="M76 170 Q112 180 150 170 L150 177 Q112 187 76 177 Z" fill="#2a2024" stroke="#15171c" stroke-width="1.4"/>
+      <g fill="url(#gold)" stroke="#5c430f" stroke-width=".7"><circle cx="84" cy="175" r="2.6"/><circle cx="96" cy="178" r="2.6"/><circle cx="108" cy="179.5" r="2.6"/><circle cx="120" cy="179.5" r="2.6"/><circle cx="132" cy="178" r="2.6"/><circle cx="143" cy="175" r="2.6"/></g>
+      <!-- spada a terra -->
+      <g stroke="#15171c" stroke-linejoin="round">
+        <path d="M146.5 160 L146.5 278 L150 290 L153.5 278 L153.5 160 Z" fill="url(#blade)" stroke-width="1.2"/>
+        <path d="M150 164 L150 272" stroke="#6f7a87" stroke-width="1.3"/>
+        <path d="M132 156 Q150 151 168 156 L168 162 Q150 157 132 162 Z" fill="url(#gold)" stroke-width="1"/>
+        <rect x="147" y="138" width="6" height="18" fill="url(#leather)" stroke-width="1"/>
+        <circle cx="150" cy="133" r="6.5" fill="url(#gold)" stroke-width="1"/>
+        <circle cx="150" cy="133" r="2.6" fill="#7d5913" stroke="none"/>
+      </g>
+      <!-- camaglio -->
+      <path d="M84 72 Q86 96 76 104 Q110 116 146 102 Q136 92 136 72 Z" fill="url(#mail)" stroke="#15171c" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M84 72 Q86 96 76 104 Q110 116 146 102 Q136 92 136 72 Z" fill="url(#shadeR)"/>
+      <path d="M76 104 Q110 116 146 102" stroke="url(#gold)" stroke-width="1.8" fill="none"/>
+      <!-- bacinetto con visiera a becco -->
+      <g stroke="#15171c" stroke-width="1.6" stroke-linejoin="round">
+        <path d="M84 82 Q80 46 100 20 Q118 36 128 52 Q134 64 132 82 Z" fill="url(#steel)"/>
+        <path d="M100 46 Q122 42 132 52 L157 67 Q138 76 131 86 Q114 90 100 84 Z" fill="url(#steel)"/>
+      </g>
+      <path d="M100 46 Q122 42 132 52 L157 67 Q138 76 131 86 Q114 90 100 84 Z" fill="url(#gloss)"/>
+      <path d="M108 54 L129 54.5 L129 57.5 L108 58.5 Z" fill="#0b0d11"/>
+      <g fill="#0b0d11"><circle cx="138" cy="69" r="1.2"/><circle cx="142" cy="71" r="1.2"/><circle cx="146" cy="69" r="1.2"/><circle cx="140" cy="74" r="1.2"/><circle cx="144" cy="76" r="1.2"/></g>
+      <circle cx="100" cy="58" r="2.8" fill="url(#gold)" stroke="#15171c" stroke-width=".8"/>
+      <path d="M90 60 Q90 38 100 24" stroke="#fff" stroke-width="2.6" opacity=".7" fill="none" stroke-linecap="round"/>
+      <!-- braccio vicino -->
+      <g stroke="#15171c" stroke-width="1.6" stroke-linejoin="round">
+        <path d="M86 112 L104 112 L106 136 L90 138 Z" fill="url(#steel)"/>
+        <path d="M96 134 L104 146 L146 146 L144 134 Z" fill="url(#steel)"/>
+        <circle cx="99" cy="139" r="7.5" fill="url(#steel)"/>
+        <path d="M78 102 Q90 94 106 100 L106 118 Q92 122 78 116 Z" fill="url(#steel)"/>
+        <path d="M78 116 Q92 122 106 118 L106 124 Q92 128 79 122 Z" fill="url(#steel)"/>
+        <rect x="140" y="139" width="20" height="10" rx="4" fill="url(#steel)" stroke-width="1.5"/>
+        <rect x="141" y="149" width="18" height="9" rx="4" fill="url(#steel)" stroke-width="1.5"/>
+      </g>
+      <path d="M78 102 Q90 94 106 100 L106 118 Q92 122 78 116 Z" fill="url(#gloss)"/>
+    </symbol>
+  </defs>
+</svg>
 
 <div class="wrap">
   <header>
     <span class="tag">Last Line · personaggio</span>
-    <h1>Sei bozzetti per il cavaliere</h1>
-    <p>Tutti di profilo e rivolti a destra, perché il gioco scorre in orizzontale. Sono disegni originali: ho evitato di proposito i colori rosso e bianco, l'elmo argento col pennacchio e lo scudo con l'emblema del cavaliere di Defenders &amp; Dragons.</p>
+    <h1>Tre cavalieri medievali</h1>
+    <p>Armature storiche vere, ognuna di un secolo diverso. Tutti rivolti a destra perché il gioco scorre in orizzontale. Più sotto li trovi alla dimensione reale che avranno sul telefono.</p>
   </header>
 
   <div class="grid">
-
-    <!-- 1 CHIBI -->
     <article class="card">
-      <div class="stage">
-        <svg viewBox="0 0 200 200" role="img" aria-label="Cavaliere chibi con elmo enorme">
-          <ellipse cx="100" cy="184" rx="44" ry="6" fill="#00000026"/>
-          <path d="M48 120 h32 v22 c0 14 -16 22 -16 22 c0 0 -16 -8 -16 -22z" fill="#e0a83a" stroke="#9a6d1d" stroke-width="3"/>
-          <g transform="rotate(22 140 150)">
-            <rect x="135" y="62" width="10" height="76" rx="3" fill="#eef2f7" stroke="#6b7a90" stroke-width="2"/>
-            <rect x="125" y="136" width="30" height="7" rx="3" fill="#e0a83a"/>
-            <rect x="136" y="143" width="8" height="16" rx="2" fill="#7a4a2a"/>
-          </g>
-          <rect x="80" y="150" width="16" height="28" rx="5" fill="#6b7a90"/>
-          <rect x="104" y="150" width="16" height="28" rx="5" fill="#6b7a90"/>
-          <rect x="76" y="172" width="22" height="10" rx="4" fill="#3b4558"/>
-          <rect x="102" y="172" width="25" height="10" rx="4" fill="#3b4558"/>
-          <rect x="70" y="114" width="60" height="46" rx="16" fill="#3a6fd8"/>
-          <path d="M90 118 h20 v26 l-10 7 l-10 -7z" fill="#e0a83a"/>
-          <circle cx="138" cy="150" r="9" fill="#c7d1e0" stroke="#6b7a90" stroke-width="2"/>
-          <circle cx="100" cy="76" r="48" fill="#c7d1e0"/>
-          <path d="M60 96 a48 48 0 0 0 80 6 a54 54 0 0 1 -80 -6z" fill="#a4b0c2"/>
-          <rect x="108" y="66" width="40" height="12" rx="6" fill="#1d2433"/>
-          <circle cx="134" cy="72" r="3" fill="#7fd1ff"/>
-          <path d="M96 30 C 82 6, 50 10, 44 32 C 60 22, 78 26, 92 38 Z" fill="#3a6fd8"/>
-        </svg>
-      </div>
+      <div class="stage"><svg viewBox="0 0 220 300" role="img" aria-label="Cavaliere crociato con elmo a secchio, scudo blu e oro"><use href="#kA"/></svg></div>
       <div class="info">
-        <span class="tag">Cartoon chibi</span>
-        <h2>Ser Testone</h2>
-        <p>Elmo enorme e corpo piccolo, visiera a fessura con un riflesso al posto degli occhi. Acciaio azzurrino, blu e oro.</p>
-        <dl>
-          <dt>Leggibilità</dt><dd>Ottima anche su schermi piccoli: la testa grande si riconosce subito</dd>
-          <dt>Animazione</dt><dd><span class="meter"><i class="on"></i><i class="on"></i><i></i></span> media</dd>
-          <dt>Rischio</dt><dd>Stile molto diffuso tra i giochi mobile, quindi si nota meno</dd>
-        </dl>
+        <span class="tag">XIII secolo</span>
+        <h2>Il Crociato</h2>
+        <span class="era">Elmo a secchio, cotta di maglia, sopravveste lunga</span>
+        <p>Elmo cilindrico con croce in ottone e fori per respirare. Scudo a mandorla blu con capriolo e bisanti d'oro. Spada dritta tenuta in guardia.</p>
       </div>
     </article>
-
-    <!-- 2 PIXEL -->
     <article class="card">
-      <div class="stage">
-        <svg id="pixel" viewBox="0 0 16 16" shape-rendering="crispEdges" role="img" aria-label="Cavaliere in pixel art"></svg>
-      </div>
+      <div class="stage"><svg viewBox="0 0 220 300" role="img" aria-label="Cavaliere in armatura gotica a piastre con spadone sulla spalla"><use href="#kB"/></svg></div>
       <div class="info">
-        <span class="tag">Pixel art 16×16</span>
-        <h2>Il Custode</h2>
-        <p>Retrò, pochi colori: verde bosco, oro e un pennacchio viola. Ogni pixel conta, quindi deve funzionare anche ingrandito tre o quattro volte.</p>
-        <dl>
-          <dt>Leggibilità</dt><dd>Buona se ingrandito a multipli interi, si rovina se scalato male</dd>
-          <dt>Animazione</dt><dd><span class="meter"><i class="on"></i><i class="on"></i><i></i></span> fotogramma per fotogramma, 4-6 frame a mossa</dd>
-          <dt>Rischio</dt><dd>Sembra amatoriale se gli sfondi non sono dello stesso stile</dd>
-        </dl>
+        <span class="tag">XV secolo</span>
+        <h2>Il Gotico</h2>
+        <span class="era">Celata con barbozza, armatura a piastre completa</span>
+        <p>Corazza scanalata, grandi spallacci, scarpe d'acciaio a punta, bordi dorati e mantello verde scuro. Spadone a due mani appoggiato sulla spalla, pronto a calare.</p>
       </div>
     </article>
-
-    <!-- 3 FLAT GEOMETRICO -->
     <article class="card">
-      <div class="stage">
-        <svg viewBox="0 0 200 200" role="img" aria-label="Cavaliere geometrico con mani fluttuanti">
-          <ellipse cx="100" cy="186" rx="36" ry="5" fill="#00000026"/>
-          <circle cx="56" cy="132" r="21" fill="#ff7a59"/>
-          <circle cx="56" cy="132" r="8" fill="#e8e4da"/>
-          <path d="M72 112 L128 112 L138 166 L62 166 Z" fill="#1f9e89"/>
-          <rect x="62" y="158" width="76" height="8" fill="#13705f"/>
-          <rect x="70" y="173" width="22" height="9" rx="4.5" fill="#26323f"/>
-          <rect x="108" y="173" width="22" height="9" rx="4.5" fill="#26323f"/>
-          <path d="M74 110 V70 a26 26 0 0 1 52 0 V110 Z" fill="#e8e4da"/>
-          <rect x="104" y="80" width="22" height="7" fill="#26323f"/>
-          <path d="M100 45 L100 22 L126 33 Z" fill="#ff7a59"/>
-          <rect x="99" y="22" width="3" height="24" fill="#26323f"/>
-          <rect x="147" y="56" width="7" height="64" fill="#e8e4da" stroke="#26323f" stroke-width="2"/>
-          <rect x="137" y="118" width="27" height="6" fill="#26323f"/>
-          <circle cx="150.5" cy="132" r="8" fill="#e8e4da" stroke="#26323f" stroke-width="2"/>
-        </svg>
-      </div>
+      <div class="stage"><svg viewBox="0 0 220 300" role="img" aria-label="Cavaliere con bacinetto a becco, giubba inquartata nero e oro, mantello"><use href="#kC"/></svg></div>
       <div class="info">
-        <span class="tag">Flat geometrico</span>
-        <h2>Pedina</h2>
-        <p>Solo forme base: trapezio, cupola, cerchi. Niente braccia: mani, scudo e spada fluttuano, quindi si animano spostandoli e basta.</p>
-        <dl>
-          <dt>Leggibilità</dt><dd>Molto pulita, pochi dettagli che si perdono</dd>
-          <dt>Animazione</dt><dd><span class="meter"><i class="on"></i><i></i><i></i></span> la più facile, si disegna direttamente nel codice</dd>
-          <dt>Rischio</dt><dd>Poco "fantasy": più puzzle game che avventura</dd>
-        </dl>
-      </div>
-    </article>
-
-    <!-- 4 CONTORNO SPESSO -->
-    <article class="card">
-      <div class="stage">
-        <svg viewBox="0 0 200 200" role="img" aria-label="Cavaliere cartoon con contorno nero spesso">
-          <ellipse cx="100" cy="186" rx="44" ry="6" fill="#00000026"/>
-          <g stroke="#1b1b24" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
-            <path d="M151 146 L174 60 L184 64 L161 150 Z" fill="#eef2f6"/>
-            <path d="M139 140 L176 151" fill="none" stroke-width="9"/>
-            <path d="M139 140 L176 151" fill="none" stroke="#c98a2b" stroke-width="3"/>
-            <path d="M82 150 V176 H72 V184 H98 V150 Z" fill="#6d4a2f"/>
-            <path d="M104 150 V184 H132 V176 H120 V150 Z" fill="#6d4a2f"/>
-            <path d="M70 108 H130 L136 160 H64 Z" fill="#3e9b4f"/>
-            <path d="M64 146 H136" fill="none"/>
-            <path d="M70 108 V58 Q100 34 130 58 V108 Z" fill="#b9c2cc"/>
-            <path d="M104 74 H130 M117 64 V92" fill="none"/>
-            <path d="M40 112 H80 V142 Q80 164 60 172 Q40 164 40 142 Z" fill="#f2c14e"/>
-            <path d="M60 114 V170" fill="none"/>
-            <circle cx="154" cy="146" r="10" fill="#b9c2cc"/>
-          </g>
-        </svg>
-      </div>
-      <div class="info">
-        <span class="tag">Cartoon a contorno</span>
-        <h2>Bertoldo</h2>
-        <p>Elmo a secchio con visiera a croce, tabarro verde, scudo giallo, contorno nero spesso. Lo stile più vicino al genere dei giochi a ondate fantasy, ma con una sagoma diversa.</p>
-        <dl>
-          <dt>Leggibilità</dt><dd>La migliore su sfondi pieni di cose, grazie al contorno</dd>
-          <dt>Animazione</dt><dd><span class="meter"><i class="on"></i><i class="on"></i><i></i></span> media, con pezzi separati (vedi bozzetto 6)</dd>
-          <dt>Rischio</dt><dd>Serve coerenza: anche nemici e sfondi col contorno</dd>
-        </dl>
-      </div>
-    </article>
-
-    <!-- 5 SILHOUETTE -->
-    <article class="card">
-      <div class="stage full">
-        <svg viewBox="0 0 200 200" role="img" aria-label="Sagoma nera di cavaliere controluce al tramonto">
-          <defs>
-            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#3b1d5e"/><stop offset="1" stop-color="#ff8a4c"/>
-            </linearGradient>
-          </defs>
-          <rect width="200" height="200" fill="url(#sky)"/>
-          <circle cx="56" cy="72" r="28" fill="#ffd9a0" opacity=".85"/>
-          <rect y="178" width="200" height="22" fill="#120a1c"/>
-          <g fill="#120a1c">
-            <path d="M80 104 C 54 120, 40 150, 28 178 L 92 178 L 96 108 Z"/>
-            <path d="M78 100 H122 L126 160 H74 Z"/>
-            <rect x="80" y="156" width="14" height="24"/>
-            <rect x="104" y="156" width="14" height="24"/>
-            <path d="M78 100 V64 Q100 44 122 64 V100 Z"/>
-            <path d="M98 50 L92 26 L106 48 Z"/>
-            <path d="M116 112 L142 118 L142 127 L114 124 Z"/>
-            <rect x="139" y="96" width="6" height="84"/>
-            <rect x="129" y="108" width="26" height="6"/>
-          </g>
-          <rect x="104" y="74" width="18" height="5" rx="2" fill="#5ff2ff"/>
-        </svg>
-      </div>
-      <div class="info">
-        <span class="tag">Silhouette</span>
-        <h2>L'Ombra</h2>
-        <p>Sagoma nera controluce con un solo dettaglio luminoso, la visiera. Mantello che sventola. Atmosfera cupa e d'impatto.</p>
-        <dl>
-          <dt>Leggibilità</dt><dd>Forte la sagoma, ma i nemici devono restare distinguibili</dd>
-          <dt>Animazione</dt><dd><span class="meter"><i class="on"></i><i></i><i></i></span> bassa, i dettagli interni non servono</dd>
-          <dt>Rischio</dt><dd>Se tutto è nero, in una mischia affollata non si capisce cosa succede</dd>
-        </dl>
-      </div>
-    </article>
-
-    <!-- 6 CUTOUT -->
-    <article class="card">
-      <div class="stage">
-        <svg viewBox="0 0 200 200" role="img" aria-label="Cavaliere a pezzi di carta con perni alle giunture">
-          <defs>
-            <filter id="paper" x="-10%" y="-10%" width="130%" height="130%">
-              <feDropShadow dx="2" dy="2" stdDeviation="0" flood-color="#000" flood-opacity=".22"/>
-            </filter>
-          </defs>
-          <ellipse cx="100" cy="186" rx="40" ry="5" fill="#00000026"/>
-          <g filter="url(#paper)">
-            <rect x="70" y="118" width="14" height="38" rx="7" fill="#5e6b5a" transform="rotate(20 77 120)"/>
-            <rect x="86" y="150" width="16" height="32" rx="6" fill="#5e6b5a" transform="rotate(-10 94 152)"/>
-            <path d="M74 108 H126 L120 158 H80 Z" fill="#9a6440"/>
-            <rect x="100" y="150" width="16" height="32" rx="6" fill="#7a8a76" transform="rotate(12 108 152)"/>
-            <g transform="rotate(-6 100 106)">
-              <rect x="76" y="58" width="50" height="50" rx="14" fill="#b4b1a4"/>
-              <rect x="104" y="76" width="22" height="6" fill="#2c2a26"/>
-            </g>
-            <g transform="rotate(15 150 140)">
-              <rect x="147" y="64" width="6" height="70" fill="#dcd8cc"/>
-              <rect x="138" y="130" width="24" height="5" fill="#6b4a2a"/>
-            </g>
-            <rect x="114" y="114" width="14" height="38" rx="7" fill="#7a8a76" transform="rotate(-50 121 116)"/>
-          </g>
-          <g fill="#d4a017">
-            <circle cx="77" cy="120" r="3"/><circle cx="94" cy="152" r="3"/><circle cx="108" cy="152" r="3"/>
-            <circle cx="121" cy="116" r="3"/><circle cx="100" cy="106" r="3"/>
-          </g>
-        </svg>
-      </div>
-      <div class="info">
-        <span class="tag">Marionetta di carta</span>
-        <h2>Il Fante di Cartone</h2>
-        <p>Pezzi ritagliati uniti da perni dorati. È anche una tecnica: qualunque bozzetto sopra si può dividere così e animare ruotando i pezzi nel codice, senza disegnare ogni frame.</p>
-        <dl>
-          <dt>Leggibilità</dt><dd>Buona, look artigianale e caldo</dd>
-          <dt>Animazione</dt><dd><span class="meter"><i class="on"></i><i class="on"></i><i></i></span> fluida, pochi disegni da fare</dd>
-          <dt>Rischio</dt><dd>Le giunture si vedono quando i pezzi ruotano molto</dd>
-        </dl>
+        <span class="tag">XIV secolo</span>
+        <h2>Il Bacinetto</h2>
+        <span class="era">Visiera a becco, camaglio, giubba araldica</span>
+        <p>Il profilo più riconoscibile: elmo a punta con la visiera a muso di cane. Giubba inquartata nero e oro, cintura a placche, mantello bordeaux. Si appoggia sulla spada piantata a terra.</p>
       </div>
     </article>
   </div>
 
+  <section class="ingame">
+    <h3>Alla dimensione reale del gioco</h3>
+    <div class="strip">
+      <svg viewBox="0 0 800 220" role="img" aria-label="I tre cavalieri piccoli su un prato, come appariranno nel gioco">
+        <rect width="800" height="220" fill="url(#sky)"/>
+        <path d="M0 150 Q120 120 240 140 T480 135 T800 140 V220 H0 Z" fill="#7ea36a"/>
+        <path d="M0 170 Q200 160 400 168 T800 166 V220 H0 Z" fill="#5d8a4a"/>
+        <rect y="186" width="800" height="34" fill="#4a733b"/>
+        <path d="M0 186 H800" stroke="#3a5c2e" stroke-width="2"/>
+        <use href="#kA" x="120" y="110" width="58" height="80"/>
+        <use href="#kB" x="370" y="110" width="58" height="80"/>
+        <use href="#kC" x="620" y="110" width="58" height="80"/>
+      </svg>
+    </div>
+    <p>Qui ogni cavaliere è alto circa 80 pixel, la stessa dimensione che avrà su un telefono. A questa scala si leggono la sagoma dell'elmo, i due colori principali e l'arma. I dettagli fini (fori dell'elmo, bisanti, rivetti) si perdono quasi tutti, quindi conviene puntare sull'elmo e sul mantello.</p>
+  </section>
+
   <section class="note">
-    <h3>Cosa conta per la scelta</h3>
-    <p>Il cavaliere misurerà circa 60-90 pixel di altezza sullo schermo del telefono. A quella dimensione contano solo sagoma e due-tre colori: i dettagli fini (emblemi, rivetti) spariscono.</p>
-    <p>Il mio consiglio è il 4 (contorno spesso) realizzato con la tecnica del 6 (pezzi separati). Così posso disegnarlo e animarlo direttamente nel codice: camminata, fendente, parata e colpo subito, senza grafica esterna. Il pixel art (2) è l'alternativa se preferisci un look retrò, ma richiede disegnare a mano ogni fotogramma.</p>
+    <h3>Limiti di questi disegni</h3>
+    <p>Sono illustrazioni vettoriali che ho disegnato forma per forma. Per un gioco da Play Store sono una base dignitosa, ma non arrivano al livello di un illustratore. Se vuoi una qualità da gioco commerciale ci sono due strade: un pacchetto di sprite di cavalieri con licenza commerciale (su itch.io o CraftPix costano tra 0 e 30 €, già animati), oppure un artista su commissione, partendo dal bozzetto che scegli qui.</p>
+    <p>Qualunque scegli, lo divido in pezzi (elmo, busto, braccia, gambe, arma) e lo animo nel codice: camminata, fendente, parata, colpo subito.</p>
   </section>
 </div>
-
-<script>
-  (function () {
-    var map = [
-      "................",
-      ".......PP.......",
-      "......PPP....S..",
-      "....HHHHHH...S..",
-      "...HHHHHHHH..S..",
-      "...hHHHHVVV..S..",
-      "...hHHHHHHH..S..",
-      "....hHHHHH..GGG.",
-      "..DDDTTTTTAAA...",
-      "..DGDTTGTTTA....",
-      "..DGDTGGGTT.....",
-      "..DDDBBBBBB.....",
-      "...D.TTTTTT.....",
-      ".....LL..LL.....",
-      ".....LL..LL.....",
-      "....FFF..FFF...."
-    ];
-    var pal = { P: "#7b4fd9", H: "#c9d1de", h: "#8a95a8", V: "#1a1f2b", S: "#e6edf5", G: "#f0c04a",
-      T: "#2f7d6b", A: "#a9b3c2", D: "#2f7d6b", B: "#6b4a2a", L: "#5b6474", F: "#3a3f4b" };
-    var svg = document.getElementById("pixel"), ns = "http://www.w3.org/2000/svg";
-    map.forEach(function (row, y) {
-      for (var x = 0; x < row.length; x++) {
-        var c = pal[row[x]];
-        if (!c) continue;
-        var r = document.createElementNS(ns, "rect");
-        r.setAttribute("x", x); r.setAttribute("y", y); r.setAttribute("width", 1); r.setAttribute("height", 1);
-        r.setAttribute("fill", c);
-        svg.appendChild(r);
-      }
-    });
-  })();
-</script>
