@@ -1,8 +1,14 @@
 # Last Line
 
-Gioco mobile a ondate: la navicella si muove solo a destra/sinistra (trascinando il dito), spara da sola.
-I nemici scendono a ondate; se superano la linea rossa perdi una vita. Ogni 5 ondate c'è un boss.
+Gioco mobile a ondate a scorrimento orizzontale (telefono in orizzontale). Un cavaliere difende le mura del castello
+a sinistra dalle orde che arrivano da destra. Si muove solo a destra e sinistra, attacca (combo di 3 colpi),
+para con lo scudo e, con la barra Furia piena, fa un fendente circolare.
+Nemici: goblin, orchi, scheletri arcieri, pipistrelli demoniaci (puntano dritti alle mura) e un boss ogni 5 ondate.
+Se il cavaliere cade torna dopo 6 secondi; la partita finisce quando cadono le mura.
 Tra un'ondata e l'altra scegli 1 potenziamento su 3.
+
+La grafica di cavaliere e nemici è un segnaposto disegnato in codice (`drawKnight`, `drawEnemy` in `www/game.js`),
+pensato per essere sostituito dagli sprite definitivi. Bozzetti e prompt per la grafica: `concept/cavalieri.html`.
 
 Stack: HTML5 Canvas + JavaScript puro (`www/`), impacchettato per Android con Capacitor 8 (`android/`).
 
@@ -10,7 +16,7 @@ Stack: HTML5 Canvas + JavaScript puro (`www/`), impacchettato per Android con Ca
 ```
 npm run serve   # poi apri http://localhost:8080 (anche da telefono sulla stessa rete)
 ```
-Da tastiera: frecce / A-D per muoversi, P o Esc per la pausa, 1-2-3 per i potenziamenti.
+Da tastiera: A/D o frecce per muoversi, J o spazio per attaccare, K o Shift per parare, L per la Furia, P o Esc per la pausa, 1-2-3 per i potenziamenti.
 
 ## Build Android
 Ogni push su GitHub avvia `.github/workflows/android.yml`, che produce l'APK di debug
@@ -45,4 +51,5 @@ Dopo ogni modifica a `www/` va rieseguito `npx cap sync android`.
 ## Da fare prima della pubblicazione
 - Icona e splash screen personalizzati (ora sono quelli di default di Capacitor):
   `npx @capacitor/assets generate` partendo da `assets/icon.png` 1024×1024.
-- Verificare su un telefono reale notch/barra di stato e la sensibilità del trascinamento (`SENS` in `www/game.js`).
+- Sostituire la grafica segnaposto con gli sprite definitivi.
+- Verificare su un telefono reale dimensione e posizione dei pulsanti e il bilanciamento delle ondate.
