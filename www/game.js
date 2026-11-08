@@ -76,6 +76,30 @@
   };
   function vibrate(ms) { try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) { /* ignore */ } }
 
+  // ---------- Grafica esterna (www/assets) ----------
+  // Ogni immagine è un PNG con sfondo trasparente, personaggio di profilo rivolto a DESTRA, piedi sul bordo inferiore.
+  // Si elencano in www/assets/art.js; se un file manca si usa il disegno segnaposto in codice.
+  const ART = {};
+  (window.ART_FILES || []).forEach(name => {
+    const img = new Image();
+    img.onload = () => { ART[name] = img; };
+    img.src = 'assets/' + name + '.png';
+  });
+  // altezza a schermo (unità logiche) di ogni sprite
+  const ART_H = { knight: 88, goblin: 48, orc: 74, archer: 62, bat: 40, boss: 135 };
+  function drawSprite(img, x, footY, h, dir, o) {
+    o = o || {};
+    const w = img.width * h / img.height;
+    ctx.save();
+    ctx.translate(x + (o.dx || 0), footY + (o.dy || 0));
+    ctx.scale(dir * (o.sx || 1), o.sy || 1);
+    if (o.rot) ctx.rotate(o.rot);
+    if (o.alpha !== undefined) ctx.globalAlpha = o.alpha;
+    if (o.flash) ctx.filter = 'brightness(2.6)';
+    ctx.drawImage(img, -w / 2, -h, w, h);
+    ctx.restore();
+  }
+
   // ---------- Utils ----------
   const rand = (a, b) => a + Math.random() * (b - a);
   const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
@@ -113,36 +137,47 @@
 
   // ---------- Nemici ----------
   const EDEF = {
-    goblin: { hp: 22, speed: 72, dmg: 6, rate: 0.9, wind: 0.3, range: 26, w: 26, h: 40, score: 10, fury: 8 },
-    orc:    { hp: 75, speed: 40, dmg: 15, rate: 1.5, wind: 0.45, range: 36, w: 44, h: 62, score: 30, fury: 14 },
-    archer: { hp: 24, speed: 52, dmg: 8, rate: 2.3, wind: 0.5, range: 240, w: 24, h: 50, score: 20, fury: 10, ranged: true },
-    bat:    { hp: 12, speed: 100, dmg: 5, rate: 1.0, wind: 0.2, range: 20, w: 30, h: 22, score: 12, fury: 6, flying: true },
-    boss:   { hp: 520, speed: 30, dmg: 28, rate: 2.2, wind: 0.75, range: 60, w: 80, h: 110, score: 400, fury: 60 }
+    goblin: { hp: 30, speed: 86, dmg: 8, rate: 0.8, wind: 0.28, range: 26, w: 26, h: 40, score: 10, fury: 7 },
+    orc:    { hp: 100, speed: 44, dmg: 19, rate: 1.4, wind: 0.42, range: 36, w: 44, h: 62, score: 30, fury: 12 },
+    archer: { hp: 30, speed: 56, dmg: 10, rate: 1.9, wind: 0.45, range: 260, w: 24, h: 50, score: 20, fury: 9, ranged: true },
+    bat:    { hp: 16, speed: 115, dmg: 7, rate: 0.9, wind: 0.2, range: 20, w: 30, h: 22, score: 12, fury: 5, flying: true },
+    boss:   { hp: 800, speed: 34, dmg: 34, rate: 1.9, wind: 0.65, range: 62, w: 80, h: 110, score: 400, fury: 50 }
   };
   function pickType(n) {
-    const w = [['goblin', 10], ['orc', n >= 2 ? 3 + n * 0.3 : 0], ['archer', n >= 3 ? 3 + n * 0.3 : 0], ['bat', n >= 4 ? 3 : 0]];
+    const w = [['goblin', 10], ['orc', n >= 2 ? 3 + n * 0.5 : 0], ['archer', n >= 2 ? 3 + n * 0.4 : 0], ['bat', n >= 3 ? 3 + n * 0.2 : 0]];
     let tot = 0; for (const [, v] of w) tot += v;
     let r = Math.random() * tot;
     for (const [k, v] of w) if ((r -= v) <= 0) return k;
     return 'goblin';
   }
   function buildWave(n) {
+    // difficoltà: più nemici, più vicini, più resistenti e più forti a ogni ondata; dalla 4 compaiono gli élite
     const q = []; let t = 2;
-    const mul = 1 + (n - 1) * 0.15;
+    const mul = 1 + (n - 1) * 0.22;
+    const dmul = 1 + (n - 1) * 0.08;
+    const elite = () => n >= 4 && Math.random() < Math.min(0.35, 0.08 + (n - 4) * 0.03);
     if (n % 5 === 0) {
-      q.push({ t, type: 'boss', mul: 1 + (n / 5 - 1) * 0.7 });
-      for (let i = 0; i < 3 + n; i++) { t += 2.2; q.push({ t, type: i % 2 ? 'goblin' : 'archer', mul }); }
+      q.push({ t, type: 'boss', mul: 1 + (n / 5 - 1) * 0.8, dmul });
+      for (let i = 0; i < 6 + n; i++) { t += 1.6; q.push({ t, type: ['goblin', 'archer', 'orc'][i % 3], mul, dmul, elite: elite() }); }
       return q;
     }
-    const count = 5 + Math.round(n * 2.2);
-    const gap = Math.max(0.55, 1.8 - n * 0.08);
-    for (let i = 0; i < count; i++) { q.push({ t, type: pickType(n), mul }); t += gap * rand(0.6, 1.3); }
+    const count = 8 + Math.round(n * 3);
+    const gap = Math.max(0.35, 1.3 - n * 0.07);
+    let i = 0;
+    while (i < count) {
+      // a volte arrivano a gruppi
+      const group = n >= 2 && Math.random() < 0.3 ? 2 + Math.floor(Math.random() * 2) : 1;
+      const type = pickType(n);
+      for (let g = 0; g < group && i < count; g++, i++) q.push({ t: t + g * 0.35, type, mul, dmul, elite: elite() });
+      t += gap * rand(0.6, 1.3) * group;
+    }
     return q;
   }
   function spawn(s) {
     const d = EDEF[s.type];
-    const hp = Math.round(d.hp * s.mul);
-    enemies.push({ type: s.type, d, x: WORLD_W + 30 + rand(0, 20), y: d.flying ? GROUND - 90 : GROUND, hp, maxHp: hp,
+    const el = !!s.elite;
+    const hp = Math.round(d.hp * s.mul * (el ? 1.8 : 1));
+    enemies.push({ type: s.type, d, elite: el, dmg: d.dmg * (s.dmul || 1) * (el ? 1.4 : 1), x: WORLD_W + 30 + rand(0, 20), y: d.flying ? GROUND - 90 : GROUND, hp, maxHp: hp,
       dir: -1, state: 'walk', t: rand(0, 5), wind: 0, atkCd: rand(0.2, 0.8), kb: 0, flash: 0, target: null, speed: d.speed * rand(0.9, 1.1) });
   }
 
@@ -169,7 +204,7 @@
   }
   function killEnemy(e) {
     e.dead = true;
-    score += e.d.score;
+    score += e.d.score * (e.elite ? 2 : 1);
     knight.fury = Math.min(100, knight.fury + e.d.fury * knight.furyGain);
     burst(e.x, e.y - e.d.h * 0.5, e.type === 'archer' ? '#d8d2c0' : '#8a1a24', e.type === 'boss' ? 50 : 14, e.type === 'boss' ? 300 : 200);
     shake = Math.max(shake, e.type === 'boss' ? 14 : 3);
@@ -193,7 +228,7 @@
     shake = Math.max(shake, 5);
     floater(knight.x, GROUND - 84, '-' + Math.round(dmg), '#ff6b6b');
     if (knight.hp <= 0) {
-      knight.hp = 0; knight.state = 'dead'; knight.deadT = 6; knight.blocking = false;
+      knight.hp = 0; knight.state = 'dead'; knight.deadT = 8; knight.blocking = false;
       burst(knight.x, GROUND - 40, '#ff6a2a', 40, 260);
       floater(knight.x, GROUND - 100, 'Il cavaliere è caduto', '#ffb38a', 14);
     }
@@ -325,9 +360,9 @@
           const ty = target === 'knight' ? GROUND - 40 : GROUND - rand(30, 110);
           shootArrow(e, tx, ty);
         } else if (target === 'knight' && Math.abs(knight.x - e.x) < d.range + 18) {
-          hurtKnight(d.dmg, e.x);
+          hurtKnight(e.dmg, e.x);
         } else if (target === 'castle') {
-          hurtCastle(d.dmg);
+          hurtCastle(e.dmg);
         }
         if (e.type === 'boss') { shake = Math.max(shake, 8); burst(e.x + e.dir * 50, GROUND, '#6b5a50', 16, 200); }
       }
@@ -347,7 +382,7 @@
     const dist = Math.max(40, sx - tx);
     const vx = -320, T = dist / 320, g = 260;
     const vy = (ty - sy) / T - 0.5 * g * T;
-    arrows.push({ x: sx, y: sy, vx, vy, g, dmg: e.d.dmg, from: e.x });
+    arrows.push({ x: sx, y: sy, vx, vy, g, dmg: e.dmg, from: e.x });
     sfx.arrow();
   }
 
@@ -389,7 +424,7 @@
   function chooseUpgrade(i) {
     const u = upgradeChoices[i]; if (!u) return;
     u.apply(); sfx.pick();
-    knight.hp = Math.min(knight.maxHp, knight.hp + knight.maxHp * 0.25);
+    knight.hp = Math.min(knight.maxHp, knight.hp + knight.maxHp * 0.15);
     startWave(); setState('play');
   }
 
@@ -639,6 +674,12 @@
   function drawCastle() {
     const ox = -camX;
     if (ox + GATE_X < -10) return;
+    if (ART.castle) {
+      const h = 250, w = ART.castle.width * h / ART.castle.height;
+      ctx.drawImage(ART.castle, ox + GATE_X + 6 - w, GROUND + 4 - h, w, h);
+      if (castle && castle.hitT > 0) { ctx.fillStyle = 'rgba(255,80,60,.2)'; ctx.fillRect(ox + GATE_X + 6 - w, GROUND + 4 - h, w, h); }
+      return;
+    }
     ctx.save(); ctx.translate(ox, 0);
     const top = GROUND - 150;
     const stone = ctx.createLinearGradient(0, 0, GATE_X, 0);
@@ -709,7 +750,7 @@
     if (k.state === 'dead') {
       // elmo a terra e luce che si spegne
       const x = k.x - camX;
-      ctx.globalAlpha = clamp(k.deadT / 6, 0.2, 1);
+      ctx.globalAlpha = clamp(k.deadT / 8, 0.2, 1);
       ctx.fillStyle = K.armorDk; ctx.beginPath(); ctx.ellipse(x, GROUND - 6, 16, 6, 0, 0, Math.PI * 2); ctx.fill();
       ctx.globalAlpha = 1;
       return;
@@ -717,6 +758,7 @@
     if (k.inv > 0 && Math.floor(k.inv * 14) % 2 === 0) return;
     const x = k.x - camX;
     const bob = k.moving ? Math.abs(Math.sin(k.walk)) * 2 : Math.sin(time * 2.2) * 0.8;
+    if (ART.knight) { drawKnightSprite(k, x, bob); return; }
     const ls = k.moving ? Math.sin(k.walk) * 0.6 : 0;
     ctx.save();
     ctx.translate(x, GROUND);
@@ -829,6 +871,40 @@
     ctx.restore();
   }
 
+  function drawKnightSprite(k, x, bob) {
+    ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.beginPath(); ctx.ellipse(x, GROUND + 1, 24, 5, 0, 0, Math.PI * 2); ctx.fill();
+    let rot = k.moving ? Math.sin(k.walk) * 0.04 : 0, dx = 0, sx = 1, sy = 1 - bob * 0.006;
+    if (k.state === 'attack') {
+      const t = clamp(k.atkT / SWING, 0, 1);
+      rot = t < 0.3 ? lerp(0, -0.12, t / 0.3) : lerp(-0.12, 0.16, easeOut(Math.min(1, (t - 0.3) / 0.4)));
+      dx = (t < 0.3 ? -2 : 6) * k.dir;
+    } else if (k.state === 'special') { sx = Math.cos(k.specT * 20); }
+    else if (k.blocking) { rot = -0.06; sy = 0.97; }
+    drawSprite(ART.knight, x, GROUND, ART_H.knight, k.dir, { rot, dx, sx, sy, flash: k.hurtT > 0 });
+    if ((k.state === 'attack' && k.atkT < 0.22) || (k.state === 'special' && k.specT < 0.45)) {
+      ctx.save(); ctx.translate(x, GROUND); ctx.scale(k.dir, 1);
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.strokeStyle = k.state === 'special' ? 'rgba(255,120,40,.75)' : 'rgba(255,220,190,.6)';
+      ctx.lineWidth = k.state === 'special' ? 6 : 3.5;
+      ctx.beginPath();
+      if (k.state === 'special') ctx.arc(0, -44, 54, 0, Math.PI * 2); else ctx.arc(10, -46, 48, -1.4, 1.1);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  function drawEnemySprite(e, x, img) {
+    const d = e.d, h = ART_H[e.type] * (e.elite ? 1.15 : 1);
+    const walk = e.state === 'walk' && !e.target ? e.t * 9 : 0;
+    const wind = e.state === 'windup' ? 1 - e.wind / d.wind : 0;
+    let rot = Math.sin(walk) * 0.06, dy = -Math.abs(Math.sin(walk)) * 2;
+    if (wind) rot = -0.16 * wind;
+    if (e.strikeT > 0) rot = 0.2;
+    if (d.flying) { dy = h / 2; rot = Math.sin(e.t * 18) * 0.12; }
+    if (!d.flying) { ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(x, GROUND + 1, d.w * 0.6, 4, 0, 0, Math.PI * 2); ctx.fill(); }
+    drawSprite(img, x, e.y, h, e.dir, { rot, dy, flash: e.flash > 0 });
+  }
+
   // ---------- Nemici (segnaposto) ----------
   function drawEnemy(e) {
     const x = e.x - camX;
@@ -838,14 +914,25 @@
     const ls = Math.sin(walk) * 0.7;
     const wind = e.state === 'windup' ? 1 - e.wind / d.wind : 0;
     const strike = e.strikeT > 0 ? 1 : 0;
+    if (e.elite) {
+      // alone rosso pulsante
+      ctx.globalCompositeOperation = 'lighter';
+      const ag = ctx.createRadialGradient(x, e.y - d.h * 0.5, 2, x, e.y - d.h * 0.5, d.h * 0.9);
+      ag.addColorStop(0, 'rgba(255,40,30,' + (0.28 + Math.sin(time * 6) * 0.08) + ')'); ag.addColorStop(1, 'rgba(255,40,30,0)');
+      ctx.fillStyle = ag; ctx.fillRect(x - d.h, e.y - d.h * 1.5, d.h * 2, d.h * 2);
+      ctx.globalCompositeOperation = 'source-over';
+    }
+    const img = ART[e.type];
+    if (img) drawEnemySprite(e, x, img);
     ctx.save();
     ctx.translate(x, e.y);
+    if (e.elite && !img) ctx.scale(1.15, 1.15);
     if (!d.flying) { ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(0, 1, d.w * 0.55, 4, 0, 0, Math.PI * 2); ctx.fill(); }
     ctx.scale(-e.dir, 1);   // disegnati rivolti a sinistra
     const flash = e.flash > 0;
     const col = c => flash ? '#ffffff' : c;
 
-    if (e.type === 'goblin') {
+    if (img) { /* sprite già disegnato */ } else if (e.type === 'goblin') {
       const b = Math.abs(Math.sin(walk)) * 2;
       limb(2, -14, 2 + ls * 7, -1, 5, col('#2f4a22')); limb(-4, -14, -4 - ls * 7, -1, 5, col('#3b5a2a'));
       ctx.fillStyle = col('#4f7a3a'); ctx.beginPath(); ctx.ellipse(0, -22 - b, 10, 11, 0.25, 0, Math.PI * 2); ctx.fill();
@@ -916,6 +1003,7 @@
       ctx.restore();
     }
     ctx.restore();
+    ctx.globalAlpha = 1;
     // barra vita
     if (e.hp < e.maxHp && e.type !== 'boss') {
       const w = Math.max(24, d.w), y = e.y - d.h - 12;
@@ -1013,11 +1101,18 @@
   }
 
   function drawWorld() {
-    drawSky();
-    layer(0.12, 230, 70, 70, '#26162e', 1);
-    layer(0.3, 262, 45, 50, '#1c1222', 7);
-    drawTrees(0.3, '#160d1a');
-    layer(0.55, 285, 22, 40, '#191016', 13);
+    if (ART.background) {
+      // sfondo dipinto ripetuto in orizzontale con parallasse
+      const img = ART.background, h = GROUND + 30, w = img.width * h / img.height;
+      const off = (camX * 0.3) % w;
+      for (let x = -off; x < W; x += w) ctx.drawImage(img, x, 0, w + 1, h);
+    } else {
+      drawSky();
+      layer(0.12, 230, 70, 70, '#26162e', 1);
+      layer(0.3, 262, 45, 50, '#1c1222', 7);
+      drawTrees(0.3, '#160d1a');
+    }
+    layer(0.55, 285, 22, 40, 'rgba(25,16,22,.85)', 13);
     drawGround();
     drawCastle();
   }

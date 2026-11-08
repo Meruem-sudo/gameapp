@@ -36,6 +36,12 @@
   button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   section { display: grid; gap: 12px; max-width: 80ch; border-top: 1px solid var(--line); padding-top: 22px; }
   section h3 { font-family: var(--display); margin: 0; font-size: 23px; }
+  .kit { max-width: none; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+  .kit { overflow-x: auto; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+  td code { font-family: var(--mono); font-size: 12.5px; color: var(--accent); }
   ol { margin: 0; padding-left: 22px; display: grid; gap: 8px; }
 </style>
 
@@ -47,6 +53,16 @@
   </header>
 
   <div class="grid" id="cards"></div>
+
+  <section class="kit">
+    <h3>Kit grafico completo per il gioco</h3>
+    <p>Queste sono tutte le immagini che servono per sostituire i disegni segnaposto. Usa lo stesso strumento e la stessa frase di stile per tutte, così sembrano fatte dalla stessa mano.</p>
+    <table>
+      <thead><tr><th>File</th><th>Cosa</th><th>Formato</th></tr></thead>
+      <tbody id="kit-table"></tbody>
+    </table>
+  </section>
+  <div class="grid" id="kit"></div>
 
   <section>
     <h3>Prompt da aggiungere sempre</h3>
@@ -60,10 +76,12 @@
   <section>
     <h3>Come si arriva al gioco</h3>
     <ol>
-      <li>Scegli la variante e generala con uno strumento a tua scelta (Midjourney, Leonardo, ChatGPT, Stable Diffusion). Fai qualche tentativo e tieni quella che ti piace.</li>
-      <li>Con l'immagine scelta come riferimento, genera il foglio personaggio qui sopra. Serve una vista laterale pulita su sfondo uniforme.</li>
-      <li>Mandami l'immagine. Scontorno lo sfondo, la divido in pezzi (elmo, busto, braccia, gambe, arma, mantello) e la animo nel codice: attesa, camminata, attacco, parata, colpito, morte.</li>
+      <li>Scegli la variante del cavaliere e generala. Per ogni immagine fai 3 o 4 tentativi e tieni la migliore.</li>
+      <li>Genera anche i nemici, il castello e lo sfondo con i prompt del kit qui sopra. Se un personaggio esce rivolto a sinistra va bene lo stesso, lo giro io.</li>
+      <li>Mandami le immagini direttamente in questa chat, dicendomi quale è quale. Tolgo lo sfondo verde, le ritaglio, le ridimensiono e le inserisco: il gioco le usa subito al posto dei disegni segnaposto e ti rigenero l'APK.</li>
+      <li>Le immagini singole si muovono in modo semplice (oscillano, si inclinano quando colpiscono). Per animazioni vere, cioè gambe che camminano e braccio che fende, serve un passo in più: o il foglio personaggio da dividere in pezzi, oppure strisce di fotogrammi.</li>
     </ol>
+    <p><strong>Perché lo sfondo verde.</strong> Molti generatori non sanno fare lo sfondo trasparente e lo disegnano a scacchi finti. Un verde pieno invece lo tolgo io in automatico. Se un personaggio ha molto verde addosso, per esempio il Bronzo dell'Abisso con la fiamma verde, scrivi magenta (#FF00FF) al posto del verde.</p>
     <p><strong>Da sapere.</strong> I generatori faticano a disegnare lo stesso personaggio identico in pose diverse. Per questo conviene una sola immagine pulita da animare a pezzi, invece di chiedere ogni fotogramma. Prima di pubblicare controlla nei termini d'uso dello strumento che l'uso commerciale sia permesso; con molti strumenti dipende dal piano. Infine, non scrivere "Force of Will" o il nome di un artista nel prompt: rischieresti un'immagine troppo simile a un'opera protetta.</p>
   </section>
 </div>
@@ -86,7 +104,7 @@
       look: "Bronzo antico mangiato dal verderame, come riemerso da una tomba. Fiamma verde.",
       helm_it: "Cresta a pinna all'indietro, paramascella sporgente come una mandibola",
       weapon_it: "Falcione dalla lama enorme e ricurva",
-      p: { who: "ancient cursed knight", armor: "dark weathered bronze plate armor corroded with turquoise verdigris, engraved patterns", helm: "helmet with a tall swept-back fin crest and a protruding jaw-like mandible guard, glowing green eyes", weapon: "wielding a long glaive with a huge curved blade", cape: "torn moss-green cape fraying into green ghost fire", fx: "green embers, crumbling stone, drifting dust" } },
+      p: { who: "cursed ancient knight", armor: "dark weathered bronze plate armor corroded with turquoise verdigris, engraved patterns", helm: "helmet with a tall swept-back fin crest and a protruding jaw-like mandible guard, glowing green eyes", weapon: "wielding a long glaive with a huge curved blade", cape: "torn moss-green cape fraying into green ghost fire", fx: "green embers, crumbling stone, drifting dust" } },
     { name: "Argento Corrotto", c1: "#9aa0aa", c2: "#ff2e3e", sw: ["#9aa0aa", "#3e434c", "#7a1e22", "#ff2e3e"],
       look: "Argento ossidato con venature rosso sangue, mantello nero come fumo.",
       helm_it: "Corna da toro rivolte in avanti, occhi rossi",
@@ -103,6 +121,40 @@
       weapon_it: "Alabarda incrostata di ghiaccio",
       p: { who: "frost cursed knight", armor: "frost-covered steel-blue plate armor with jagged ice crystals growing from the shoulders", helm: "wolf skull shaped helmet with fangs, fur mantle collar, glowing ice-blue eyes", weapon: "wielding a halberd encrusted with ice", cape: "tattered pale cape freezing into ice shards", fx: "cold blue mist, drifting snow" } }
   ];
+  var STYLE = "dark fantasy, realistic painterly digital art, highly detailed, dramatic rim lighting, consistent style for a 2D side-scrolling game";
+  var RULES = "strict side view facing right, full body visible including feet and weapon, single character centered, on a plain flat pure green #00FF00 background, no ground shadow, no text";
+  var KIT = [
+    { file: "knight", it: "Il cavaliere (la variante che scegli sopra)", fmt: "verticale, sfondo verde",
+      p: "copia il prompt della variante scelta e sostituisci la parte finale \"isolated on a plain flat dark grey background\" con: " + RULES },
+    { file: "goblin", it: "Goblin, veloce e debole", fmt: "verticale, sfondo verde",
+      p: "small vicious goblin raider, hunched running pose, ragged leather armor, rusty curved dagger, yellow eyes, " + STYLE + ", " + RULES },
+    { file: "orc", it: "Orco, lento e resistente", fmt: "verticale, sfondo verde",
+      p: "huge brutish orc warrior, crude black iron armor plates, heavy double-bladed war axe raised, tusks, " + STYLE + ", " + RULES },
+    { file: "archer", it: "Scheletro arciere", fmt: "verticale, sfondo verde",
+      p: "undead skeleton archer in a torn dark hood, drawing a longbow, glowing teal eye sockets, rusted armor scraps, " + STYLE + ", " + RULES },
+    { file: "bat", it: "Demonietto volante", fmt: "quadrato, sfondo verde",
+      p: "winged bat-like demon imp in flight, membranous wings spread wide, red glowing eyes, claws, " + STYLE + ", side view facing right, entire creature visible, on a plain flat pure green #00FF00 background, no text" },
+    { file: "boss", it: "Boss, il Signore delle Ossa", fmt: "verticale, sfondo verde",
+      p: "colossal armored ogre warlord, bone-plated armor, horned helmet, giant spiked club, glowing red eyes, menacing stance, " + STYLE + ", " + RULES },
+    { file: "castle", it: "Le mura del castello, porta sul lato destro", fmt: "verticale, sfondo verde",
+      p: "medieval stone castle wall with a tall tower and a heavy wooden gate on the right side, battlements, burning torches, red banner, night, side view, " + STYLE + ", on a plain flat pure green #00FF00 background, no text" },
+    { file: "background", it: "Sfondo del campo di battaglia", fmt: "orizzontale 3:1, senza personaggi",
+      p: "wide panoramic night battlefield landscape, huge blood moon, distant jagged mountains, dead twisted trees, dark purple and crimson sky with mist, empty foreground, no characters, no buildings, seamless horizontally tileable, " + STYLE + ", 3:1 aspect ratio, no text" }
+  ];
+  var tb = document.getElementById("kit-table"), kit = document.getElementById("kit");
+  KIT.forEach(function (k, i) {
+    var tr = document.createElement("tr");
+    tr.innerHTML = "<td><code>" + k.file + "</code></td><td>" + k.it + "</td><td>" + k.fmt + "</td>";
+    tb.appendChild(tr);
+    var a = document.createElement("article");
+    a.className = "card";
+    a.style.setProperty("--c1", "#5a4a3a"); a.style.setProperty("--c2", "#c9a050");
+    a.innerHTML = '<span class="tag">' + k.file + '</span><h2>' + k.it + '</h2>' +
+      '<div class="row"><span>Prompt</span><button type="button" data-copy="k' + i + '">Copia</button></div><pre id="k' + i + '"></pre>';
+    kit.appendChild(a);
+    document.getElementById("k" + i).textContent = k.p;
+  });
+
   function fill(t, p) { return t.replace(/\{(\w+)\}/g, function (_, k) { return p[k]; }); }
   var root = document.getElementById("cards");
   V.forEach(function (v, i) {
