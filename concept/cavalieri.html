@@ -2,347 +2,91 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@700;800&family=Alegreya+Sans:wght@400;500;700&display=swap">
 <style>
-  /* Layout: tre tavole grandi (dettaglio) + una striscia "in gioco" a dimensione reale */
+  /* Layout: tre tavole scure (dark fantasy) in griglia + striscia "in gioco" a dimensione reale. Pagina sempre scura, scelta voluta. */
   :root {
-    --bg: #efe9dd; --surface: #fbf8f2; --ink: #26221c; --muted: #6c6356; --line: #d8cfbf; --accent: #8a4b1c;
-    --stage: #e2dccf;
+    --bg: #0f0d12; --surface: #18151c; --ink: #ece6f0; --muted: #a59cae; --line: #2c2733; --accent: #e8894a;
     --display: "Alegreya SC", Georgia, serif;
     --body: "Alegreya Sans", system-ui, sans-serif;
+    color-scheme: dark;
   }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-    --bg: #17150f; --surface: #221f18; --ink: #efe8da; --muted: #a89e8c; --line: #3a352a; --accent: #e09a5e; --stage: #2e2a22; color-scheme: dark } }
-  :root[data-theme="dark"] {
-    --bg: #17150f; --surface: #221f18; --ink: #efe8da; --muted: #a89e8c; --line: #3a352a; --accent: #e09a5e; --stage: #2e2a22; color-scheme: dark }
-
   body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.5;
     padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-  .wrap { max-width: 1120px; margin: 0 auto; padding-block: 40px 64px; display: grid; gap: 32px; }
-  header { display: grid; gap: 8px; max-width: 68ch; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding-block: 40px 64px; display: grid; gap: 32px; }
+  header { display: grid; gap: 8px; max-width: 70ch; }
   h1 { font-family: var(--display); font-size: clamp(30px, 5vw, 46px); line-height: 1.05; margin: 0; text-wrap: balance; }
   header p, .note p { margin: 0; }
   header p { color: var(--muted); }
   .tag { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 20px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 20px; }
   .card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; }
-  .stage { background: radial-gradient(circle at 50% 40%, var(--surface), var(--stage) 75%); aspect-ratio: 22 / 30; max-width: 100%;
-    display: grid; place-items: center; border-bottom: 1px solid var(--line); }
-  .stage svg { width: 88%; height: 88%; }
-  .info { padding: 16px 18px 20px; display: grid; gap: 10px; align-content: start; min-width: 0; }
-  h2 { font-family: var(--display); font-size: 24px; margin: 0; line-height: 1.1; }
-  .era { color: var(--muted); font-size: 14px; }
+  .stage { aspect-ratio: 26 / 30; max-width: 100%; background: radial-gradient(circle at 55% 38%, var(--halo), #0b090e 72%); border-bottom: 1px solid var(--line); }
+  .stage svg { width: 100%; height: 100%; display: block; }
+  .info { padding: 16px 18px 20px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+  h2 { font-family: var(--display); font-size: 25px; margin: 0; line-height: 1.1; }
+  .sub { color: var(--muted); font-size: 14px; }
   .info p { margin: 0; }
   .ingame { display: grid; gap: 12px; }
   .ingame h3, .note h3 { font-family: var(--display); margin: 0; font-size: 22px; }
   .strip { border-radius: 6px; overflow: hidden; border: 1px solid var(--line); }
   .strip svg { display: block; width: 100%; height: auto; }
-  .ingame p { margin: 0; color: var(--muted); font-size: 14px; max-width: 72ch; }
-  .note { border-top: 1px solid var(--line); padding-top: 20px; max-width: 72ch; display: grid; gap: 8px; }
+  .ingame p { margin: 0; color: var(--muted); font-size: 14px; max-width: 74ch; }
+  .note { border-top: 1px solid var(--line); padding-top: 20px; max-width: 74ch; display: grid; gap: 10px; }
+
+  /* palette per variante: le usano tutte le parti dell'armatura */
+  .v-brace   { --a: #2a262d; --a2: #141116; --t: #7a6450; --g: #ff7a1a; --c: #1b1418; --halo: #4a2414; }
+  .v-cremisi { --a: #7c1729; --a2: #3a0811; --t: #caa24c; --g: #b77bff; --c: #2b1640; --halo: #3a1d4e; }
+  .v-spettro { --a: #3b4754; --a2: #1a2129; --t: #9fb0bf; --g: #62e3ff; --c: #121a22; --halo: #143444; }
 </style>
 
-<!-- definizioni condivise: gradienti, maglia di ferro, i tre cavalieri come simboli -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <linearGradient id="steel" x1="0" x2="1">
-      <stop offset="0" stop-color="#f3f6f9"/><stop offset=".3" stop-color="#c9d1da"/>
-      <stop offset=".62" stop-color="#7c8794"/><stop offset=".8" stop-color="#aab4bf"/><stop offset="1" stop-color="#4a535e"/>
+    <linearGradient id="shadeR" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="1"/></linearGradient>
+    <linearGradient id="hl" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".42"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity=".35"/>
     </linearGradient>
-    <linearGradient id="steelV" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#f3f6f9"/><stop offset=".4" stop-color="#b9c2cc"/><stop offset="1" stop-color="#58626e"/>
-    </linearGradient>
-    <linearGradient id="blade" x1="0" x2="1">
-      <stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#d5dce4"/><stop offset=".55" stop-color="#8d98a5"/><stop offset="1" stop-color="#c3cbd4"/>
-    </linearGradient>
-    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#fff0b8"/><stop offset=".45" stop-color="#d9a940"/><stop offset="1" stop-color="#7d5913"/>
-    </linearGradient>
-    <linearGradient id="blue" x1="0" x2="1">
-      <stop offset="0" stop-color="#3561ad"/><stop offset=".55" stop-color="#1d3a74"/><stop offset="1" stop-color="#0f2048"/>
-    </linearGradient>
-    <linearGradient id="teal" x1="0" x2="1">
-      <stop offset="0" stop-color="#2f7f78"/><stop offset="1" stop-color="#123c3a"/>
-    </linearGradient>
-    <linearGradient id="wine" x1="0" x2="1">
-      <stop offset="0" stop-color="#7d2f42"/><stop offset="1" stop-color="#36111c"/>
-    </linearGradient>
-    <linearGradient id="leather" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#7a4f2c"/><stop offset="1" stop-color="#3b2413"/>
-    </linearGradient>
-    <linearGradient id="shadeR" x1="0" x2="1">
-      <stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/>
-    </linearGradient>
-    <radialGradient id="gloss" cx=".32" cy=".25" r=".85">
-      <stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".4" stop-color="#fff" stop-opacity="0"/>
-      <stop offset="1" stop-color="#000" stop-opacity=".4"/>
-    </radialGradient>
-    <pattern id="mail" width="4" height="3" patternUnits="userSpaceOnUse">
-      <rect width="4" height="3" fill="#86909c"/>
-      <path d="M0 3 A2 2 0 0 1 4 3" fill="none" stroke="#353b44" stroke-width=".8"/>
-      <circle cx="2" cy="1.3" r=".6" fill="#d3dae2"/>
-    </pattern>
-    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#6fa8d6"/><stop offset="1" stop-color="#cfe4ef"/>
-    </linearGradient>
-
-    <!-- ============ A: CROCIATO ============ -->
-    <symbol id="kA" viewBox="0 0 220 300">
-      <ellipse cx="114" cy="291" rx="62" ry="7" fill="#000" opacity=".25"/>
-      <g stroke="#15171c" stroke-width="1.6" stroke-linejoin="round">
-        <!-- gamba dietro -->
-        <path d="M90 200 L110 200 L106 232 L103 276 L116 281 L117 290 L84 290 L86 276 L86 232 Z" fill="url(#mail)"/>
-        <path d="M90 200 L110 200 L106 232 L103 276 L116 281 L117 290 L84 290 L86 276 L86 232 Z" fill="#000" opacity=".3" stroke="none"/>
-        <ellipse cx="96" cy="232" rx="10" ry="8" fill="url(#steel)"/>
-        <!-- gamba davanti -->
-        <path d="M114 200 L134 200 L140 230 L143 276 L160 282 L161 291 L124 291 L124 276 L120 232 Z" fill="url(#mail)"/>
-        <path d="M114 200 L134 200 L140 230 L143 276 L160 282 L161 291 L124 291 L124 276 L120 232 Z" fill="url(#shadeR)" stroke="none"/>
-        <ellipse cx="131" cy="230" rx="11" ry="9" fill="url(#steel)"/>
-        <path d="M124 286 L113 284" stroke="url(#gold)" stroke-width="2.4" fill="none"/>
-        <circle cx="111" cy="284" r="2.4" fill="url(#gold)" stroke-width="1"/>
-        <!-- braccio lontano -->
-        <path d="M130 98 L148 102 L170 146 L158 156 L136 120 Z" fill="url(#mail)"/>
-        <path d="M130 98 L148 102 L170 146 L158 156 L136 120 Z" fill="#000" opacity=".35" stroke="none"/>
-        <!-- sopravveste -->
-        <path d="M76 94 Q110 84 144 94 L148 150 L156 226 Q134 234 114 226 L111 214 L108 226 Q90 234 66 226 L74 150 Z" fill="url(#blue)"/>
-      </g>
-      <g fill="none" stroke-linecap="round">
-        <g stroke="#0a1633" stroke-width="1.6" opacity=".75">
-          <path d="M84 160 Q82 196 78 224"/><path d="M98 160 Q99 196 95 228"/><path d="M128 160 Q130 196 134 228"/><path d="M142 160 Q146 196 150 226"/>
-        </g>
-        <g stroke="#5b86d1" stroke-width="1" opacity=".6">
-          <path d="M87 162 Q85 196 82 222"/><path d="M131 162 Q133 196 137 226"/>
-        </g>
-        <path d="M66 226 Q90 234 108 226 M114 226 Q134 234 156 226" stroke="url(#gold)" stroke-width="2.6"/>
-      </g>
-      <g stroke="#15171c" stroke-width="1.6" stroke-linejoin="round">
-        <!-- cintura -->
-        <path d="M74 148 Q110 156 148 148 L148 156 Q110 164 74 156 Z" fill="url(#leather)"/>
-        <rect x="104" y="150" width="10" height="9" rx="1.5" fill="url(#gold)" stroke-width="1"/>
-        <!-- camaglio -->
-        <path d="M82 76 Q107 90 134 76 L138 98 Q108 106 78 98 Z" fill="url(#mail)"/>
-        <path d="M82 76 Q107 90 134 76 L138 98 Q108 106 78 98 Z" fill="url(#shadeR)" stroke="none"/>
-        <!-- elmo a secchio -->
-        <path d="M84 38 Q107 24 132 38 L134 80 Q108 90 82 80 Z" fill="url(#steel)"/>
-        <path d="M84 38 Q107 24 132 38 Q107 46 84 38 Z" fill="#e4e9ef"/>
-        <path d="M115 41 L120 41 L120 86 L115 86 Z" fill="url(#gold)" stroke-width="1"/>
-        <path d="M98 56 L133 55 L133 60 L98 61 Z" fill="url(#gold)" stroke-width="1"/>
-      </g>
-      <path d="M100 50 L114 50 L114 54.5 L100 55 Z M121 49.5 L133 49 L133 54 L121 54.5 Z" fill="#0b0d11"/>
-      <g fill="#0b0d11"><circle cx="125" cy="66" r="1.3"/><circle cx="129.5" cy="66" r="1.3"/><circle cx="125" cy="71" r="1.3"/><circle cx="129.5" cy="71" r="1.3"/><circle cx="127.2" cy="76" r="1.3"/></g>
-      <g fill="#f5f7fa"><circle cx="88" cy="80" r="1.1"/><circle cx="96" cy="83" r="1.1"/><circle cx="104" cy="85" r="1.1"/><circle cx="124" cy="84" r="1.1"/><circle cx="131" cy="81" r="1.1"/></g>
-      <path d="M90 42 Q92 60 90 78" stroke="#fff" stroke-width="2.6" opacity=".65" fill="none" stroke-linecap="round"/>
-      <!-- scudo -->
-      <g stroke-linejoin="round">
-        <path d="M92 104 Q122 96 152 104 L152 140 Q150 184 122 212 Q94 184 92 140 Z" fill="url(#blue)" stroke="#15171c" stroke-width="1.8"/>
-        <path d="M96 107.5 Q122 100.5 148 107.5 L148 140 Q146 180 122 206 Q98 180 96 140 Z" fill="none" stroke="url(#gold)" stroke-width="2.2"/>
-        <path d="M100 170 L122 136 L144 170 L136 175 L122 153 L108 175 Z" fill="url(#gold)" stroke="#5c430f" stroke-width="1"/>
-        <g fill="url(#gold)" stroke="#5c430f" stroke-width="1"><circle cx="108" cy="122" r="5.5"/><circle cx="136" cy="122" r="5.5"/><circle cx="122" cy="190" r="5"/></g>
-        <path d="M92 104 Q122 96 152 104 L152 140 Q150 184 122 212 Q94 184 92 140 Z" fill="url(#gloss)"/>
-        <g stroke="#fff" stroke-opacity=".35" stroke-width=".8" fill="none"><path d="M104 146 l9 -4"/><path d="M134 186 l6 -7"/><path d="M140 132 l5 3"/></g>
-      </g>
-      <!-- spada e guanto -->
-      <g transform="rotate(6 161 150)" stroke="#15171c" stroke-linejoin="round">
-        <path d="M157.5 141 L157.5 34 L161 20 L164.5 34 L164.5 141 Z" fill="url(#blade)" stroke-width="1.2"/>
-        <path d="M161 38 L161 136" stroke="#6f7a87" stroke-width="1.4"/>
-        <path d="M143 139 Q161 135 179 139 L179 145 Q161 141 143 145 Z" fill="url(#gold)" stroke-width="1"/>
-        <rect x="158" y="145" width="6" height="20" fill="url(#leather)" stroke-width="1"/>
-        <circle cx="161" cy="169" r="5.5" fill="url(#gold)" stroke-width="1"/>
-      </g>
-      <path d="M151 147 Q161 142 171 147 L172 161 Q161 166 151 161 Z" fill="url(#steel)" stroke="#15171c" stroke-width="1.6"/>
-      <path d="M154 152 Q161 149 169 152 M154 156.5 Q161 153.5 169 156.5" stroke="#3d454f" stroke-width=".9" fill="none"/>
-    </symbol>
-
-    <!-- ============ B: ARMATURA GOTICA ============ -->
-    <symbol id="kB" viewBox="0 0 220 300">
-      <ellipse cx="118" cy="291" rx="64" ry="7" fill="#000" opacity=".25"/>
-      <!-- mantello -->
-      <path d="M86 96 Q60 140 50 200 Q44 240 52 272 Q70 262 84 270 Q90 220 98 160 Z" fill="url(#teal)" stroke="#0d1716" stroke-width="1.6" stroke-linejoin="round"/>
-      <g stroke="#0a2422" stroke-width="1.4" fill="none" opacity=".8"><path d="M78 130 Q66 190 64 262"/><path d="M90 140 Q80 200 76 266"/></g>
-      <path d="M52 272 Q70 262 84 270" stroke="url(#gold)" stroke-width="2.2" fill="none"/>
-      <!-- lama dietro il corpo -->
-      <g transform="translate(138 106) rotate(-66.8)" stroke="#15171c" stroke-linejoin="round">
-        <path d="M-3.6 0 L-3.6 -112 L0 -124 L3.6 -112 L3.6 0 Z" fill="url(#blade)" stroke-width="1.2"/>
-        <path d="M0 -6 L0 -104" stroke="#6f7a87" stroke-width="1.3"/>
-      </g>
-      <g stroke="#15171c" stroke-width="1.6" stroke-linejoin="round">
-        <!-- gamba dietro -->
-        <g>
-          <path d="M90 166 L112 166 L106 222 L86 222 Z" fill="url(#steel)"/>
-          <path d="M87 232 L105 232 L103 272 L89 272 Z" fill="url(#steel)"/>
-          <path d="M86 270 L104 270 Q114 278 130 289 L86 290 Z" fill="url(#steelV)"/>
-          <ellipse cx="96" cy="227" rx="11" ry="8" fill="url(#steel)"/>
-          <path d="M90 166 L112 166 L106 222 L86 222 Z M87 232 L105 232 L103 272 L89 272 Z M86 270 L104 270 Q114 278 130 289 L86 290 Z" fill="#000" opacity=".32" stroke="none"/>
-        </g>
-        <!-- gamba davanti -->
-        <path d="M114 166 L136 166 L140 220 L120 222 Z" fill="url(#steel)"/>
-        <path d="M120 234 L140 232 L144 272 L126 274 Z" fill="url(#steel)"/>
-        <path d="M124 270 L146 270 Q160 280 178 290 L122 291 Z" fill="url(#steelV)"/>
-        <path d="M140 272 L142 290 M152 278 L154 290 M163 284 L164 290" fill="none" stroke-width="1"/>
-        <ellipse cx="130" cy="227" rx="12" ry="9" fill="url(#steel)"/>
-        <path d="M119 222 Q110 228 116 238 Q120 232 124 230 Z" fill="url(#steel)" stroke-width="1.2"/>
-        <circle cx="131" cy="227" r="2" fill="url(#gold)" stroke-width=".8"/>
-        <!-- maglia all'inguine, scarselle -->
-        <path d="M98 160 L126 160 L124 184 L100 184 Z" fill="url(#mail)"/>
-        <path d="M84 160 L104 160 L102 188 L82 186 Z" fill="url(#steel)"/>
-        <path d="M118 160 L140 160 L142 190 L120 192 Z" fill="url(#steel)"/>
-        <path d="M82 186 L102 188 M120 192 L142 190" stroke="url(#gold)" stroke-width="2"/>
-        <!-- falde -->
-        <path d="M80 144 Q112 150 144 144 L145 152 Q112 158 79 152 Z" fill="url(#steel)"/>
-        <path d="M79 152 Q112 158 145 152 L146 160 Q112 166 78 160 Z" fill="url(#steel)"/>
-        <!-- petto -->
-        <path d="M80 98 Q112 88 142 98 Q150 120 144 146 L80 146 Q74 122 80 98 Z" fill="url(#steel)"/>
-      </g>
-      <g fill="none" stroke-linecap="round">
-        <g stroke="#3a424c" stroke-width="1.1"><path d="M98 100 Q103 124 108 145"/><path d="M114 97 Q117 122 118 145"/><path d="M130 99 Q133 124 130 145"/></g>
-        <g stroke="#fff" stroke-width="1" opacity=".7"><path d="M100 100 Q105 124 110 145"/><path d="M116 97 Q119 122 120 145"/></g>
-        <path d="M84 128 Q112 116 143 128" stroke="#15171c" stroke-width="1.4"/>
-        <path d="M84 128 Q112 116 143 128" stroke="url(#gold)" stroke-width="1.4" transform="translate(0 2)"/>
-        <path d="M80 98 Q112 88 142 98" stroke="url(#gold)" stroke-width="2"/>
-      </g>
-      <!-- braccio lontano -->
-      <path d="M128 100 L144 104 L160 120 L148 130 Z" fill="url(#steel)" stroke="#15171c" stroke-width="1.6" stroke-linejoin="round"/>
-      <path d="M128 100 L144 104 L160 120 L148 130 Z" fill="#000" opacity=".35"/>
-      <!-- celata e barbozza -->
-      <g stroke="#15171c" stroke-width="1.6" stroke-linejoin="round">
-        <path d="M66 88 Q70 60 80 44 Q94 28 114 30 Q134 34 138 56 L138 64 Q124 68 108 66 Q96 74 84 82 Z" fill="url(#steel)"/>
-        <path d="M104 66 Q122 62 141 62 Q143 80 133 92 Q116 96 100 92 Z" fill="url(#steel)"/>
-      </g>
-      <path d="M114 50 L138 48 L138 53 L115 55 Z" fill="#0b0d11"/>
-      <path d="M96 46 Q118 40 138 46" stroke="#15171c" stroke-width="1.3" fill="none"/>
-      <path d="M104 66 Q122 62 141 62" stroke="url(#gold)" stroke-width="2" fill="none"/>
-      <circle cx="98" cy="50" r="2.6" fill="url(#gold)" stroke="#15171c" stroke-width=".8"/>
-      <path d="M86 46 Q98 34 116 34" stroke="#fff" stroke-width="2.6" opacity=".75" fill="none" stroke-linecap="round"/>
-      <g fill="#f5f7fa"><circle cx="72" cy="82" r="1.1"/><circle cx="78" cy="79" r="1.1"/><circle cx="110" cy="88" r="1.1"/><circle cx="122" cy="89" r="1.1"/></g>
-      <!-- spallaccio e braccio vicino -->
-      <g stroke="#15171c" stroke-width="1.6" stroke-linejoin="round">
-        <path d="M88 118 L106 118 L108 138 L92 140 Z" fill="url(#steel)"/>
-        <path d="M98 136 L106 148 L148 120 L140 110 Z" fill="url(#steel)"/>
-        <circle cx="101" cy="141" r="8" fill="url(#steel)"/>
-        <path d="M93 142 Q86 150 97 153 Q96 147 99 145 Z" fill="url(#steel)" stroke-width="1.2"/>
-        <path d="M76 96 Q86 84 104 90 Q114 100 110 118 Q96 124 80 120 Q70 110 76 96 Z" fill="url(#steel)"/>
-        <path d="M78 118 Q94 126 110 118 L110 124 Q94 132 80 126 Z" fill="url(#steel)"/>
-        <path d="M80 126 Q94 132 110 124 L109 130 Q94 138 81 132 Z" fill="url(#steel)"/>
-      </g>
-      <path d="M76 96 Q86 84 104 90" stroke="url(#gold)" stroke-width="2" fill="none"/>
-      <path d="M76 96 Q86 84 104 90 Q114 100 110 118 Q96 124 80 120 Q70 110 76 96 Z" fill="url(#gloss)"/>
-      <!-- elsa, impugnatura, guanti -->
-      <g transform="translate(138 106) rotate(-66.8)" stroke="#15171c" stroke-linejoin="round">
-        <path d="M-17 -2 Q0 -6 17 -2 L17 3 Q0 -1 -17 3 Z" fill="url(#gold)" stroke-width="1"/>
-        <rect x="-3" y="3" width="6" height="27" fill="url(#leather)" stroke-width="1"/>
-        <circle cx="0" cy="34" r="6" fill="url(#gold)" stroke-width="1"/>
-        <rect x="-8" y="5" width="16" height="10" rx="4" fill="url(#steel)" stroke-width="1.5"/>
-        <rect x="-8" y="17" width="16" height="10" rx="4" fill="url(#steel)" stroke-width="1.5"/>
-      </g>
-    </symbol>
-
-    <!-- ============ C: BACINETTO A BECCO ============ -->
-    <symbol id="kC" viewBox="0 0 220 300">
-      <ellipse cx="116" cy="291" rx="62" ry="7" fill="#000" opacity=".25"/>
-      <!-- mantello -->
-      <path d="M82 92 Q56 150 50 210 Q46 250 56 284 Q84 276 104 284 Q100 200 100 120 Z" fill="url(#wine)" stroke="#1a070d" stroke-width="1.6" stroke-linejoin="round"/>
-      <g stroke="#22080f" stroke-width="1.4" fill="none" opacity=".8"><path d="M76 130 Q64 200 66 278"/><path d="M90 140 Q82 210 86 280"/></g>
-      <path d="M56 284 Q84 276 104 284" stroke="url(#gold)" stroke-width="2.2" fill="none"/>
-      <g stroke="#15171c" stroke-width="1.6" stroke-linejoin="round">
-        <!-- gambe -->
-        <path d="M90 180 L110 180 L106 222 L88 222 Z" fill="url(#steel)"/>
-        <path d="M88 232 L105 232 L103 272 L90 272 Z" fill="url(#steel)"/>
-        <path d="M87 270 L104 270 Q112 278 124 289 L86 290 Z" fill="url(#steelV)"/>
-        <ellipse cx="97" cy="227" rx="10.5" ry="8" fill="url(#steel)"/>
-        <path d="M90 180 L110 180 L106 222 L88 222 Z M88 232 L105 232 L103 272 L90 272 Z M87 270 L104 270 Q112 278 124 289 L86 290 Z" fill="#000" opacity=".32" stroke="none"/>
-        <path d="M116 180 L136 180 L140 220 L121 222 Z" fill="url(#steel)"/>
-        <path d="M121 234 L140 232 L143 272 L127 274 Z" fill="url(#steel)"/>
-        <path d="M125 270 L145 270 Q156 280 170 290 L123 291 Z" fill="url(#steelV)"/>
-        <ellipse cx="131" cy="227" rx="11.5" ry="9" fill="url(#steel)"/>
-        <!-- braccio lontano -->
-        <path d="M128 104 L144 108 L158 144 L146 150 Z" fill="url(#steel)"/>
-        <path d="M128 104 L144 108 L158 144 L146 150 Z" fill="#000" opacity=".35" stroke="none"/>
-      </g>
-      <!-- giubba inquartata -->
-      <clipPath id="jup"><path d="M80 96 Q112 88 142 96 L146 150 L150 188 Q114 196 76 188 L78 150 Z"/></clipPath>
-      <g clip-path="url(#jup)">
-        <rect x="60" y="80" width="51" height="62" fill="#d6a43a"/>
-        <rect x="111" y="80" width="51" height="62" fill="#1d1b1f"/>
-        <rect x="60" y="142" width="51" height="60" fill="#1d1b1f"/>
-        <rect x="111" y="142" width="51" height="60" fill="#d6a43a"/>
-        <g stroke="#000" stroke-opacity=".28" stroke-width="1.2">
-          <path d="M86 90 V200 M96 90 V200 M106 90 V200 M116 90 V200 M126 90 V200 M136 90 V200"/>
-        </g>
-        <rect x="60" y="80" width="102" height="120" fill="url(#shadeR)"/>
-        <rect x="60" y="80" width="102" height="120" fill="url(#gloss)" opacity=".7"/>
-      </g>
-      <path d="M80 96 Q112 88 142 96 L146 150 L150 188 Q114 196 76 188 L78 150 Z" fill="none" stroke="#15171c" stroke-width="1.6" stroke-linejoin="round"/>
-      <!-- cintura cavalleresca -->
-      <path d="M76 170 Q112 180 150 170 L150 177 Q112 187 76 177 Z" fill="#2a2024" stroke="#15171c" stroke-width="1.4"/>
-      <g fill="url(#gold)" stroke="#5c430f" stroke-width=".7"><circle cx="84" cy="175" r="2.6"/><circle cx="96" cy="178" r="2.6"/><circle cx="108" cy="179.5" r="2.6"/><circle cx="120" cy="179.5" r="2.6"/><circle cx="132" cy="178" r="2.6"/><circle cx="143" cy="175" r="2.6"/></g>
-      <!-- spada a terra -->
-      <g stroke="#15171c" stroke-linejoin="round">
-        <path d="M146.5 160 L146.5 278 L150 290 L153.5 278 L153.5 160 Z" fill="url(#blade)" stroke-width="1.2"/>
-        <path d="M150 164 L150 272" stroke="#6f7a87" stroke-width="1.3"/>
-        <path d="M132 156 Q150 151 168 156 L168 162 Q150 157 132 162 Z" fill="url(#gold)" stroke-width="1"/>
-        <rect x="147" y="138" width="6" height="18" fill="url(#leather)" stroke-width="1"/>
-        <circle cx="150" cy="133" r="6.5" fill="url(#gold)" stroke-width="1"/>
-        <circle cx="150" cy="133" r="2.6" fill="#7d5913" stroke="none"/>
-      </g>
-      <!-- camaglio -->
-      <path d="M84 72 Q86 96 76 104 Q110 116 146 102 Q136 92 136 72 Z" fill="url(#mail)" stroke="#15171c" stroke-width="1.6" stroke-linejoin="round"/>
-      <path d="M84 72 Q86 96 76 104 Q110 116 146 102 Q136 92 136 72 Z" fill="url(#shadeR)"/>
-      <path d="M76 104 Q110 116 146 102" stroke="url(#gold)" stroke-width="1.8" fill="none"/>
-      <!-- bacinetto con visiera a becco -->
-      <g stroke="#15171c" stroke-width="1.6" stroke-linejoin="round">
-        <path d="M84 82 Q80 46 100 20 Q118 36 128 52 Q134 64 132 82 Z" fill="url(#steel)"/>
-        <path d="M100 46 Q122 42 132 52 L157 67 Q138 76 131 86 Q114 90 100 84 Z" fill="url(#steel)"/>
-      </g>
-      <path d="M100 46 Q122 42 132 52 L157 67 Q138 76 131 86 Q114 90 100 84 Z" fill="url(#gloss)"/>
-      <path d="M108 54 L129 54.5 L129 57.5 L108 58.5 Z" fill="#0b0d11"/>
-      <g fill="#0b0d11"><circle cx="138" cy="69" r="1.2"/><circle cx="142" cy="71" r="1.2"/><circle cx="146" cy="69" r="1.2"/><circle cx="140" cy="74" r="1.2"/><circle cx="144" cy="76" r="1.2"/></g>
-      <circle cx="100" cy="58" r="2.8" fill="url(#gold)" stroke="#15171c" stroke-width=".8"/>
-      <path d="M90 60 Q90 38 100 24" stroke="#fff" stroke-width="2.6" opacity=".7" fill="none" stroke-linecap="round"/>
-      <!-- braccio vicino -->
-      <g stroke="#15171c" stroke-width="1.6" stroke-linejoin="round">
-        <path d="M86 112 L104 112 L106 136 L90 138 Z" fill="url(#steel)"/>
-        <path d="M96 134 L104 146 L146 146 L144 134 Z" fill="url(#steel)"/>
-        <circle cx="99" cy="139" r="7.5" fill="url(#steel)"/>
-        <path d="M78 102 Q90 94 106 100 L106 118 Q92 122 78 116 Z" fill="url(#steel)"/>
-        <path d="M78 116 Q92 122 106 118 L106 124 Q92 128 79 122 Z" fill="url(#steel)"/>
-        <rect x="140" y="139" width="20" height="10" rx="4" fill="url(#steel)" stroke-width="1.5"/>
-        <rect x="141" y="149" width="18" height="9" rx="4" fill="url(#steel)" stroke-width="1.5"/>
-      </g>
-      <path d="M78 102 Q90 94 106 100 L106 118 Q92 122 78 116 Z" fill="url(#gloss)"/>
-    </symbol>
+    <linearGradient id="capeFade" x1="1" x2="0"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".7"/></linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6"/></filter>
   </defs>
 </svg>
 
 <div class="wrap">
   <header>
     <span class="tag">Last Line · personaggio</span>
-    <h1>Tre cavalieri medievali</h1>
-    <p>Armature storiche vere, ognuna di un secolo diverso. Tutti rivolti a destra perché il gioco scorre in orizzontale. Più sotto li trovi alla dimensione reale che avranno sul telefono.</p>
+    <h1>Cavalieri oscuri</h1>
+    <p>Tre cavalieri dark fantasy originali nello spirito dell'immagine che mi hai mandato: armatura scolpita e appuntita, posa in affondo, occhi luminosi, mantello a brandelli. Non copiano quel personaggio (elmo, arma e colori sono diversi) perché è un'illustrazione protetta da copyright di Force of Will.</p>
   </header>
 
   <div class="grid">
-    <article class="card">
-      <div class="stage"><svg viewBox="0 0 220 300" role="img" aria-label="Cavaliere crociato con elmo a secchio, scudo blu e oro"><use href="#kA"/></svg></div>
+    <article class="card v-brace">
+      <div class="stage"><svg data-knight="brace" viewBox="0 0 260 300" role="img" aria-label="Cavaliere nero con corna all'indietro, crepe arancioni incandescenti e spadone"></svg></div>
       <div class="info">
-        <span class="tag">XIII secolo</span>
-        <h2>Il Crociato</h2>
-        <span class="era">Elmo a secchio, cotta di maglia, sopravveste lunga</span>
-        <p>Elmo cilindrico con croce in ottone e fori per respirare. Scudo a mandorla blu con capriolo e bisanti d'oro. Spada dritta tenuta in guardia.</p>
+        <span class="tag">Variante 1</span>
+        <h2>Il Cavaliere di Brace</h2>
+        <span class="sub">Ossidiana · crepe di lava · spadone seghettato</span>
+        <p>Armatura nera con giunture incandescenti, come metallo appena uscito dalla forgia. Corna da drago piegate all'indietro, visiera a V che brilla di arancione. Lo spadone è tenuto basso, con la punta verso il nemico.</p>
       </div>
     </article>
-    <article class="card">
-      <div class="stage"><svg viewBox="0 0 220 300" role="img" aria-label="Cavaliere in armatura gotica a piastre con spadone sulla spalla"><use href="#kB"/></svg></div>
+    <article class="card v-cremisi">
+      <div class="stage"><svg data-knight="cremisi" viewBox="0 0 260 300" role="img" aria-label="Cavaliere cremisi con corona di punte, luce viola e falcione"></svg></div>
       <div class="info">
-        <span class="tag">XV secolo</span>
-        <h2>Il Gotico</h2>
-        <span class="era">Celata con barbozza, armatura a piastre completa</span>
-        <p>Corazza scanalata, grandi spallacci, scarpe d'acciaio a punta, bordi dorati e mantello verde scuro. Spadone a due mani appoggiato sulla spalla, pronto a calare.</p>
+        <span class="tag">Variante 2</span>
+        <h2>Il Cavaliere Cremisi</h2>
+        <span class="sub">Laccato cremisi · rifiniture d'oro · falcione</span>
+        <p>È il più vicino all'atmosfera della tua immagine: armatura rosso sangue e nebbia viola. Al posto delle corna ha una corona di punte, la visiera è a T con luce viola, e impugna un falcione dalla lama ricurva.</p>
       </div>
     </article>
-    <article class="card">
-      <div class="stage"><svg viewBox="0 0 220 300" role="img" aria-label="Cavaliere con bacinetto a becco, giubba inquartata nero e oro, mantello"><use href="#kC"/></svg></div>
+    <article class="card v-spettro">
+      <div class="stage"><svg data-knight="spettro" viewBox="0 0 260 300" role="img" aria-label="Cavaliere grigio acciaio con elmo a teschio di lupo, luce azzurra e ascia"></svg></div>
       <div class="info">
-        <span class="tag">XIV secolo</span>
-        <h2>Il Bacinetto</h2>
-        <span class="era">Visiera a becco, camaglio, giubba araldica</span>
-        <p>Il profilo più riconoscibile: elmo a punta con la visiera a muso di cane. Giubba inquartata nero e oro, cintura a placche, mantello bordeaux. Si appoggia sulla spada piantata a terra.</p>
+        <span class="tag">Variante 3</span>
+        <h2>Il Cavaliere Spettrale</h2>
+        <span class="sub">Acciaio brunito · teschio di lupo · ascia barbuta</span>
+        <p>Elmo a muso di lupo con le zanne, collare di pelliccia e luce azzurro ghiaccio. Il più leggibile da lontano, perché il colore freddo stacca bene da sfondi caldi.</p>
       </div>
     </article>
   </div>
@@ -350,23 +94,213 @@
   <section class="ingame">
     <h3>Alla dimensione reale del gioco</h3>
     <div class="strip">
-      <svg viewBox="0 0 800 220" role="img" aria-label="I tre cavalieri piccoli su un prato, come appariranno nel gioco">
-        <rect width="800" height="220" fill="url(#sky)"/>
-        <path d="M0 150 Q120 120 240 140 T480 135 T800 140 V220 H0 Z" fill="#7ea36a"/>
-        <path d="M0 170 Q200 160 400 168 T800 166 V220 H0 Z" fill="#5d8a4a"/>
-        <rect y="186" width="800" height="34" fill="#4a733b"/>
-        <path d="M0 186 H800" stroke="#3a5c2e" stroke-width="2"/>
-        <use href="#kA" x="120" y="110" width="58" height="80"/>
-        <use href="#kB" x="370" y="110" width="58" height="80"/>
-        <use href="#kC" x="620" y="110" width="58" height="80"/>
+      <svg id="strip" viewBox="0 0 800 240" role="img" aria-label="I tre cavalieri piccoli su un campo di battaglia notturno, come appariranno nel gioco">
+        <defs>
+          <linearGradient id="nsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c1430"/><stop offset="1" stop-color="#5a2f3e"/></linearGradient>
+        </defs>
+        <rect width="800" height="240" fill="url(#nsky)"/>
+        <path d="M0 160 L60 130 L120 150 L200 110 L280 145 L360 120 L440 150 L520 115 L600 140 L700 112 L800 140 V240 H0 Z" fill="#241a2a"/>
+        <rect y="196" width="800" height="44" fill="#16111a"/>
+        <path d="M0 196 H800" stroke="#3a2a36" stroke-width="2"/>
       </svg>
     </div>
-    <p>Qui ogni cavaliere è alto circa 80 pixel, la stessa dimensione che avrà su un telefono. A questa scala si leggono la sagoma dell'elmo, i due colori principali e l'arma. I dettagli fini (fori dell'elmo, bisanti, rivetti) si perdono quasi tutti, quindi conviene puntare sull'elmo e sul mantello.</p>
+    <p>Qui sono alti circa 100 pixel. In un gioco a scorrimento orizzontale il telefono sta in orizzontale, e il personaggio può occupare un quarto o un terzo dell'altezza dello schermo: questi dettagli in parte si vedono. Quelli che restano sempre leggibili sono la luce degli occhi, la sagoma dell'elmo e l'arma.</p>
   </section>
 
   <section class="note">
-    <h3>Limiti di questi disegni</h3>
-    <p>Sono illustrazioni vettoriali che ho disegnato forma per forma. Per un gioco da Play Store sono una base dignitosa, ma non arrivano al livello di un illustratore. Se vuoi una qualità da gioco commerciale ci sono due strade: un pacchetto di sprite di cavalieri con licenza commerciale (su itch.io o CraftPix costano tra 0 e 30 €, già animati), oppure un artista su commissione, partendo dal bozzetto che scegli qui.</p>
-    <p>Qualunque scegli, lo divido in pezzi (elmo, busto, braccia, gambe, arma) e lo animo nel codice: camminata, fendente, parata, colpo subito.</p>
+    <h3>Cosa posso fare e cosa no</h3>
+    <p>L'immagine che mi hai mandato è pittura digitale da carta collezionabile, fatta a mano da un illustratore. Disegnando con forme vettoriali non arrivo a quel livello. Posso fare cavalieri curati come questi e animarli bene nel codice.</p>
+    <p>Per avere esattamente quella qualità ci sono due strade. La prima è commissionare il personaggio a un illustratore di pixel art o di sprite 2D, dandogli questa pagina come riferimento (indicativamente 100–400 € per un personaggio animato). La seconda è un pacchetto di sprite "dark knight" con licenza commerciale. In entrambi i casi il codice del gioco non cambia: sostituisco il disegno e basta.</p>
   </section>
 </div>
+
+<script>
+(function () {
+  var NS = "http://www.w3.org/2000/svg";
+  var STROKE = "#08070a";
+
+  // parte: [d, fill, opzioni]  fill "a","a2","t","g","c" = variabili di palette
+  function P(d, fill, o) { o = o || {}; o.d = d; o.fill = fill; return o; }
+  var V = function (k) { return "var(--" + k + ")"; };
+
+  function draw(parent, parts) {
+    parts.forEach(function (p) {
+      if (p.g) { var g = document.createElementNS(NS, "g"); g.setAttribute("transform", p.g); parent.appendChild(g); draw(g, p.parts); return; }
+      var el = document.createElementNS(NS, "path");
+      el.setAttribute("d", p.d);
+      var fill = p.fill === "none" ? "none" : (/^#/.test(p.fill) || /^url/.test(p.fill) ? p.fill : V(p.fill));
+      el.style.fill = fill;
+      el.style.stroke = p.stroke ? (/^#/.test(p.stroke) ? p.stroke : V(p.stroke)) : (p.fill === "none" ? "none" : STROKE);
+      el.style.strokeWidth = p.sw || 1.4;
+      el.style.strokeLinejoin = "round";
+      el.style.strokeLinecap = "round";
+      if (p.op) el.style.opacity = p.op;
+      if (p.filter) el.setAttribute("filter", "url(#" + p.filter + ")");
+      parent.appendChild(el);
+      if (p.shade) { var s = document.createElementNS(NS, "path"); s.setAttribute("d", p.d); s.style.fill = "url(#shadeR)"; s.style.opacity = p.shade; parent.appendChild(s); }
+      if (p.hl) { var h = document.createElementNS(NS, "path"); h.setAttribute("d", p.d); h.style.fill = "url(#hl)"; parent.appendChild(h); }
+    });
+  }
+
+  // ---------- parti comuni ----------
+  var cape = [
+    P("M114 92 C 84 66, 44 58, 8 76 L 26 86 L 6 98 C 26 104, 22 118, 34 124 L 10 138 C 30 146, 26 162, 14 178 L 34 176 L 26 198 C 52 192, 62 206, 58 228 C 80 206, 96 192, 108 168 Z", "c", { sw: 1.2 }),
+    P("M114 92 C 84 66, 44 58, 8 76 L 26 86 L 6 98 C 26 104, 22 118, 34 124 L 10 138 C 30 146, 26 162, 14 178 L 34 176 L 26 198 C 52 192, 62 206, 58 228 C 80 206, 96 192, 108 168 Z", "url(#capeFade)", { stroke: "none" }),
+    P("M100 96 C 70 90, 50 100, 30 118 M104 120 C 80 120, 60 140, 40 168 M106 150 C 90 160, 76 180, 66 204", "none", { stroke: "#000", sw: 1.4, op: .6 })
+  ];
+  var backLeg = [
+    P("M104 164 L128 172 L104 230 L80 220 Z", "a", { shade: .55 }),
+    P("M80 224 L100 232 L68 282 L52 272 Z", "a", { shade: .55 }),
+    P("M52 270 L70 280 Q80 284 88 292 L42 292 Q42 280 52 270 Z", "a2"),
+    P("M80 212 L100 220 L100 236 L84 238 L76 228 L66 216 Z", "a2", { shade: .3 })
+  ];
+  var farArm = [
+    P("M140 94 L160 100 L176 122 L164 128 Z", "a", { shade: .55 }),
+    P("M164 112 L182 110 L198 126 L184 136 Z", "a", { shade: .45 }),
+    P("M168 108 L186 94 L180 116 Z", "a2")
+  ];
+  var farFist = [P("M184 116 Q198 112 204 122 Q204 134 190 136 Q180 132 184 116 Z", "a2", { hl: true })];
+  var body = [
+    P("M118 162 L150 160 L152 200 L146 238 L139 214 L133 248 L126 216 L118 238 L114 200 Z", "c", { shade: .35 }),
+    P("M110 160 L128 164 L122 196 L100 188 Z", "a", { shade: .45 }),
+    P("M108 98 Q132 84 158 96 Q168 122 158 150 Q140 160 116 156 Q104 130 108 98 Z", "a", { hl: true }),
+    P("M134 92 Q141 120 138 152", "none", { stroke: "t", sw: 1.6 }),
+    P("M114 118 Q132 110 157 116", "none", { stroke: "t", sw: 1.4 }),
+    P("M120 129 Q133 124 151 129 M123 141 Q136 136 151 141", "none", { stroke: "g", sw: 1.6, filter: "glow" }),
+    P("M114 150 Q138 160 160 148 L162 158 Q138 170 112 160 Z", "a", { hl: true }),
+    P("M112 160 Q138 170 162 158 L163 167 Q138 179 112 169 Z", "a2"),
+    P("M114 150 Q138 160 160 148", "none", { stroke: "t", sw: 1.4 })
+  ];
+  var frontLeg = [
+    P("M128 168 L154 166 L174 200 L152 216 Z", "a", { hl: true }),
+    P("M156 214 L177 210 L183 276 L166 280 Z", "a", { hl: true }),
+    P("M168 216 L174 274", "none", { stroke: "t", sw: 1.3 }),
+    P("M163 272 L185 270 Q200 280 218 292 L158 292 Z", "a2", { hl: true }),
+    P("M182 274 L186 292 M196 282 L198 292", "none", { stroke: STROKE, sw: 1 }),
+    P("M150 196 L174 192 L182 206 L170 222 L150 216 Z", "a2", { hl: true }),
+    P("M174 194 L196 190 L182 206 Z", "a2"),
+    P("M140 158 L166 156 L176 188 L152 198 Z", "a", { hl: true }),
+    P("M152 198 L176 188", "none", { stroke: "t", sw: 1.6 })
+  ];
+  var gorget = [P("M126 86 Q142 80 156 88 L158 100 Q142 106 124 100 Z", "a2")];
+  var pauldron = [
+    P("M94 106 Q96 82 122 78 Q142 82 142 104 Q126 118 96 118 Z", "a", { hl: true }),
+    P("M96 116 Q120 124 142 104 L144 112 Q122 132 98 126 Z", "a2"),
+    P("M94 106 Q96 82 122 78 Q142 82 142 104", "none", { stroke: "t", sw: 1.6 })
+  ];
+  var nearArm = [
+    P("M106 116 L124 114 L130 140 L112 144 Z", "a", { shade: .3 }),
+    P("M118 136 L132 130 L160 150 L150 164 Z", "a", { hl: true }),
+    P("M110 134 L128 136 L126 150 L112 150 L100 154 Z", "a2"),
+    P("M148 146 Q162 142 168 152 L176 158 L166 159 L171 168 L161 165 L161 174 L153 166 Q144 162 148 146 Z", "a2", { hl: true })
+  ];
+  var helmBase = P("M126 78 Q122 54 140 46 Q158 44 166 60 L172 76 Q164 88 150 92 L130 90 Z", "a", { hl: true });
+
+  // ---------- varianti ----------
+  var VAR = {
+    brace: {
+      back: [],
+      weapon: [{ g: "translate(193 128) rotate(-26)", parts: [
+        P("M-3 -22 L3 -22 L3 6 L-3 6 Z", "#2b1d14"),
+        P("M0 -33 L5 -22 L-5 -22 Z", "a2"),
+        P("M-7 14 L7 14 L9 40 L6 46 L9 72 L6 78 L8 110 L0 152 L-8 110 L-6 78 L-9 72 L-6 46 L-9 40 Z", "a", { hl: true }),
+        P("M0 18 L0 140", "none", { stroke: "g", sw: 2, filter: "glow" }),
+        P("M-21 3 L-6 9 L6 9 L21 3 L15 15 L-15 15 Z", "a2", { hl: true })
+      ] }],
+      spikes: [P("M102 90 L90 60 L113 84 Z", "a2", { hl: true }), P("M116 82 L115 50 L129 81 Z", "a2", { hl: true })],
+      helm: [
+        P("M132 54 C 114 40, 92 40, 70 52 C 92 50, 108 56, 126 67 Z", "a2", { hl: true }),
+        P("M138 48 C 128 26, 108 16, 88 16 C 106 26, 120 36, 130 56 Z", "a2", { hl: true }),
+        helmBase,
+        P("M140 46 Q153 52 161 66", "none", { stroke: "t", sw: 1.4 }),
+        P("M146 64 L169 67 L152 73 Z", "g", { stroke: "none", filter: "glow" }),
+        P("M134 80 Q150 82 166 80", "none", { stroke: "g", sw: 1.2, filter: "glow", op: .8 })
+      ]
+    },
+    cremisi: {
+      back: [
+        P("M18 216 L246 92", "none", { stroke: "#140a0e", sw: 6 }),
+        P("M18 216 L246 92", "none", { stroke: "t", sw: 1.2, op: .5 })
+      ],
+      weapon: [
+        P("M236 98 L245 91 Q261 68 258 38 Q250 63 230 84 Z", "a", { hl: true }),
+        P("M245 91 Q260 68 258 40", "none", { stroke: "g", sw: 1.8, filter: "glow" }),
+        P("M228 102 L238 94 L242 100 L232 108 Z", "t"),
+        P("M18 216 L6 226 L22 210 Z", "a2")
+      ],
+      spikes: [P("M96 104 C 80 90, 74 74, 80 58 C 90 78, 104 86, 120 84 Z", "a2", { hl: true }), P("M80 58 C 90 78, 104 86, 120 84", "none", { stroke: "t", sw: 1.3 })],
+      helm: [
+        P("M128 56 L117 33 L134 50 L134 22 L142 46 L151 20 L153 46 L166 31 L161 57 Z", "a2", { hl: true }),
+        helmBase,
+        P("M126 72 Q148 69 171 74", "none", { stroke: "t", sw: 1.6 }),
+        P("M150 61 L170 63 L170 66.5 L160 66.5 L158.5 80 L155 80 L155 66.5 L150 66.5 Z", "g", { stroke: "none", filter: "glow" })
+      ]
+    },
+    spettro: {
+      back: [],
+      weapon: [
+        P("M189 152 L195 152 L197 32 L191 32 Z", "#2b1d14"),
+        P("M191 32 L194 15 L197 32 Z", "a2"),
+        P("M190 46 L172 52 L190 59 Z", "a2", { hl: true }),
+        P("M196 44 Q238 32 247 72 Q232 63 214 67 Q206 78 197 80 Z", "a", { hl: true }),
+        P("M238 42 Q248 56 247 71", "none", { stroke: "g", sw: 1.8, filter: "glow" })
+      ],
+      spikes: [],
+      helm: [
+        P("M128 56 L102 40 L122 64 Z", "a2", { hl: true }),
+        P("M134 50 L116 24 L137 46 Z", "a2", { hl: true }),
+        P("M124 78 Q120 52 140 44 Q160 42 168 58 L189 70 Q183 80 168 84 Q160 92 148 94 L128 90 Z", "a", { hl: true }),
+        P("M140 44 Q158 50 170 60 L189 70", "none", { stroke: "t", sw: 1.3 }),
+        P("M150 58 L167 62 L152 65 Z", "g", { stroke: "none", filter: "glow" }),
+        P("M168 84 L170 93 L174 83 Z M160 88 L161 97 L165 87 Z", "#e9eef3", { sw: .8 })
+      ],
+      ruff: [P("M118 96 L110 86 L122 88 L119 79 L130 86 L134 76 L141 86 L149 79 L151 89 L162 87 L157 99 Z", "#59626d", { hl: true })]
+    }
+  };
+
+  // braci / particelle (posizioni fisse)
+  var EMBERS = [[30, 60, 1.6], [58, 40, 1.1], [210, 40, 1.4], [232, 150, 1.2], [20, 150, 1.3], [80, 30, 1], [240, 200, 1.6], [12, 240, 1.1], [200, 250, 1.2], [70, 250, 1]];
+
+  function knight(svg, key, small) {
+    var v = VAR[key];
+    if (!small) {
+      var halo = document.createElementNS(NS, "ellipse");
+      halo.setAttribute("cx", 140); halo.setAttribute("cy", 150); halo.setAttribute("rx", 90); halo.setAttribute("ry", 110);
+      halo.style.fill = V("g"); halo.style.opacity = .12; halo.setAttribute("filter", "url(#soft)");
+      svg.appendChild(halo);
+    }
+    draw(svg, [P("M30 292 Q130 280 236 292 L236 296 L30 296 Z", "#000", { stroke: "none", op: .55 })]);
+    draw(svg, cape);
+    draw(svg, v.back);
+    draw(svg, backLeg);
+    draw(svg, farArm);
+    draw(svg, v.weapon);
+    draw(svg, farFist);
+    draw(svg, body);
+    draw(svg, frontLeg);
+    draw(svg, gorget);
+    if (v.ruff) draw(svg, v.ruff);
+    draw(svg, v.helm);
+    draw(svg, v.spikes);
+    draw(svg, pauldron);
+    draw(svg, nearArm);
+    if (!small) EMBERS.forEach(function (e) {
+      var c = document.createElementNS(NS, "circle");
+      c.setAttribute("cx", e[0]); c.setAttribute("cy", e[1]); c.setAttribute("r", e[2]);
+      c.style.fill = V("g"); c.setAttribute("filter", "url(#glow)");
+      svg.appendChild(c);
+    });
+  }
+
+  document.querySelectorAll("svg[data-knight]").forEach(function (svg) { knight(svg, svg.getAttribute("data-knight"), false); });
+
+  var strip = document.getElementById("strip");
+  [["brace", 110, "v-brace"], ["cremisi", 350, "v-cremisi"], ["spettro", 590, "v-spettro"]].forEach(function (k) {
+    var s = document.createElementNS(NS, "svg");
+    s.setAttribute("x", k[1]); s.setAttribute("y", 100); s.setAttribute("width", 87); s.setAttribute("height", 100);
+    s.setAttribute("viewBox", "0 0 260 300"); s.setAttribute("class", k[2]); s.setAttribute("overflow", "visible");
+    strip.appendChild(s);
+    knight(s, k[0], true);
+  });
+})();
+</script>
