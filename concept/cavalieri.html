@@ -1,306 +1,132 @@
 <title>Bozzetti del Cavaliere</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@700;800&family=Alegreya+Sans:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@700;800&family=Alegreya+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400&display=swap">
 <style>
-  /* Layout: tre tavole scure (dark fantasy) in griglia + striscia "in gioco" a dimensione reale. Pagina sempre scura, scelta voluta. */
+  /* Layout: schede variante (descrizione + prompt copiabile) in griglia, poi procedura per il gioco. Pagina sempre scura, scelta voluta. */
   :root {
-    --bg: #0f0d12; --surface: #18151c; --ink: #ece6f0; --muted: #a59cae; --line: #2c2733; --accent: #e8894a;
+    --bg: #0d0b10; --surface: #17141b; --well: #0f0d13; --ink: #ece6f0; --muted: #a59cae; --line: #2a2530; --accent: #e8894a;
     --display: "Alegreya SC", Georgia, serif;
     --body: "Alegreya Sans", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
     color-scheme: dark;
   }
   body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.5;
     padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   .wrap { max-width: 1160px; margin: 0 auto; padding-block: 40px 64px; display: grid; gap: 32px; }
-  header { display: grid; gap: 8px; max-width: 70ch; }
+  header { display: grid; gap: 10px; max-width: 72ch; }
   h1 { font-family: var(--display); font-size: clamp(30px, 5vw, 46px); line-height: 1.05; margin: 0; text-wrap: balance; }
-  header p, .note p { margin: 0; }
+  header p, section p { margin: 0; }
   header p { color: var(--muted); }
   .tag { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 20px; }
-  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; }
-  .stage { aspect-ratio: 26 / 30; max-width: 100%; background: radial-gradient(circle at 55% 38%, var(--halo), #0b090e 72%); border-bottom: 1px solid var(--line); }
-  .stage svg { width: 100%; height: 100%; display: block; }
-  .info { padding: 16px 18px 20px; display: grid; gap: 8px; align-content: start; min-width: 0; }
-  h2 { font-family: var(--display); font-size: 25px; margin: 0; line-height: 1.1; }
-  .sub { color: var(--muted); font-size: 14px; }
-  .info p { margin: 0; }
-  .ingame { display: grid; gap: 12px; }
-  .ingame h3, .note h3 { font-family: var(--display); margin: 0; font-size: 22px; }
-  .strip { border-radius: 6px; overflow: hidden; border: 1px solid var(--line); }
-  .strip svg { display: block; width: 100%; height: auto; }
-  .ingame p { margin: 0; color: var(--muted); font-size: 14px; max-width: 74ch; }
-  .note { border-top: 1px solid var(--line); padding-top: 20px; max-width: 74ch; display: grid; gap: 10px; }
-
-  /* palette per variante: le usano tutte le parti dell'armatura */
-  .v-brace   { --a: #2a262d; --a2: #141116; --t: #7a6450; --g: #ff7a1a; --c: #1b1418; --halo: #4a2414; }
-  .v-cremisi { --a: #7c1729; --a2: #3a0811; --t: #caa24c; --g: #b77bff; --c: #2b1640; --halo: #3a1d4e; }
-  .v-spettro { --a: #3b4754; --a2: #1a2129; --t: #9fb0bf; --g: #62e3ff; --c: #121a22; --halo: #143444; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 18px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px; display: grid; gap: 10px; align-content: start; min-width: 0; position: relative; overflow: hidden; }
+  .card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 4px; background: linear-gradient(90deg, var(--c1), var(--c2)); }
+  .swatches { display: flex; gap: 6px; }
+  .swatches i { width: 22px; height: 22px; border-radius: 50%; border: 1px solid #ffffff22; }
+  h2 { font-family: var(--display); font-size: 23px; margin: 0; line-height: 1.1; }
+  dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 14.5px; }
+  dt { color: var(--muted); }
+  dd { margin: 0; }
+  pre { margin: 0; background: var(--well); border: 1px solid var(--line); border-radius: 4px; padding: 12px; font-family: var(--mono); font-size: 12px; line-height: 1.55;
+    white-space: pre-wrap; word-break: break-word; color: #d9d0e2; max-height: 220px; overflow: auto; }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .row span { font-size: 12px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+  button { font: 600 13px var(--body); color: var(--ink); background: #ffffff12; border: 1px solid var(--line); border-radius: 4px; padding: 5px 10px; cursor: pointer; }
+  button:hover { background: #ffffff1f; }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  section { display: grid; gap: 12px; max-width: 80ch; border-top: 1px solid var(--line); padding-top: 22px; }
+  section h3 { font-family: var(--display); margin: 0; font-size: 23px; }
+  ol { margin: 0; padding-left: 22px; display: grid; gap: 8px; }
 </style>
-
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <defs>
-    <linearGradient id="shadeR" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="1"/></linearGradient>
-    <linearGradient id="hl" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#fff" stop-opacity=".42"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/>
-      <stop offset="1" stop-color="#000" stop-opacity=".35"/>
-    </linearGradient>
-    <linearGradient id="capeFade" x1="1" x2="0"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".7"/></linearGradient>
-    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="2.2" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6"/></filter>
-  </defs>
-</svg>
 
 <div class="wrap">
   <header>
     <span class="tag">Last Line · personaggio</span>
-    <h1>Cavalieri oscuri</h1>
-    <p>Tre cavalieri dark fantasy originali nello spirito dell'immagine che mi hai mandato: armatura scolpita e appuntita, posa in affondo, occhi luminosi, mantello a brandelli. Non copiano quel personaggio (elmo, arma e colori sono diversi) perché è un'illustrazione protetta da copyright di Force of Will.</p>
+    <h1>Il Cavaliere Demone, sei varianti</h1>
+    <p>Ho provato a disegnarlo realistico col codice e il risultato sembrava un robot giocattolo. Quel livello di pittura non si ottiene con forme vettoriali, per quanti filtri ci metta. Ti preparo invece sei varianti originali ispirate alla tua immagine, ognuna con il prompt pronto da incollare in un generatore di immagini AI. Così il disegno ha davvero quella qualità; io poi lo taglio in pezzi e lo animo nel gioco.</p>
   </header>
 
-  <div class="grid">
-    <article class="card v-brace">
-      <div class="stage"><svg data-knight="brace" viewBox="0 0 260 300" role="img" aria-label="Cavaliere nero con corna all'indietro, crepe arancioni incandescenti e spadone"></svg></div>
-      <div class="info">
-        <span class="tag">Variante 1</span>
-        <h2>Il Cavaliere di Brace</h2>
-        <span class="sub">Ossidiana · crepe di lava · spadone seghettato</span>
-        <p>Armatura nera con giunture incandescenti, come metallo appena uscito dalla forgia. Corna da drago piegate all'indietro, visiera a V che brilla di arancione. Lo spadone è tenuto basso, con la punta verso il nemico.</p>
-      </div>
-    </article>
-    <article class="card v-cremisi">
-      <div class="stage"><svg data-knight="cremisi" viewBox="0 0 260 300" role="img" aria-label="Cavaliere cremisi con corona di punte, luce viola e falcione"></svg></div>
-      <div class="info">
-        <span class="tag">Variante 2</span>
-        <h2>Il Cavaliere Cremisi</h2>
-        <span class="sub">Laccato cremisi · rifiniture d'oro · falcione</span>
-        <p>È il più vicino all'atmosfera della tua immagine: armatura rosso sangue e nebbia viola. Al posto delle corna ha una corona di punte, la visiera è a T con luce viola, e impugna un falcione dalla lama ricurva.</p>
-      </div>
-    </article>
-    <article class="card v-spettro">
-      <div class="stage"><svg data-knight="spettro" viewBox="0 0 260 300" role="img" aria-label="Cavaliere grigio acciaio con elmo a teschio di lupo, luce azzurra e ascia"></svg></div>
-      <div class="info">
-        <span class="tag">Variante 3</span>
-        <h2>Il Cavaliere Spettrale</h2>
-        <span class="sub">Acciaio brunito · teschio di lupo · ascia barbuta</span>
-        <p>Elmo a muso di lupo con le zanne, collare di pelliccia e luce azzurro ghiaccio. Il più leggibile da lontano, perché il colore freddo stacca bene da sfondi caldi.</p>
-      </div>
-    </article>
-  </div>
+  <div class="grid" id="cards"></div>
 
-  <section class="ingame">
-    <h3>Alla dimensione reale del gioco</h3>
-    <div class="strip">
-      <svg id="strip" viewBox="0 0 800 240" role="img" aria-label="I tre cavalieri piccoli su un campo di battaglia notturno, come appariranno nel gioco">
-        <defs>
-          <linearGradient id="nsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c1430"/><stop offset="1" stop-color="#5a2f3e"/></linearGradient>
-        </defs>
-        <rect width="800" height="240" fill="url(#nsky)"/>
-        <path d="M0 160 L60 130 L120 150 L200 110 L280 145 L360 120 L440 150 L520 115 L600 140 L700 112 L800 140 V240 H0 Z" fill="#241a2a"/>
-        <rect y="196" width="800" height="44" fill="#16111a"/>
-        <path d="M0 196 H800" stroke="#3a2a36" stroke-width="2"/>
-      </svg>
-    </div>
-    <p>Qui sono alti circa 100 pixel. In un gioco a scorrimento orizzontale il telefono sta in orizzontale, e il personaggio può occupare un quarto o un terzo dell'altezza dello schermo: questi dettagli in parte si vedono. Quelli che restano sempre leggibili sono la luce degli occhi, la sagoma dell'elmo e l'arma.</p>
+  <section>
+    <h3>Prompt da aggiungere sempre</h3>
+    <p>I generatori lavorano meglio in inglese. Il prompt negativo evita lo stile cartoon; il foglio personaggio serve per l'animazione.</p>
+    <div class="row"><span>Prompt negativo</span><button type="button" data-copy="neg">Copia</button></div>
+    <pre id="neg">cartoon, chibi, anime, cute, toy, low detail, flat colors, text, letters, watermark, logo, signature, card frame, border, cropped feet, cropped weapon, extra limbs, extra fingers, blurry, multiple characters</pre>
+    <div class="row"><span>Foglio personaggio per l'animazione (dopo aver scelto la variante)</span><button type="button" data-copy="sheet">Copia</button></div>
+    <pre id="sheet">character turnaround sheet of the same dark fantasy knight from the reference image, strict side view facing right, full body, neutral standing pose with arms slightly away from the body, weapon shown separately next to the character, same armor design and colors in every view, realistic painterly digital art, highly detailed, even studio lighting, plain flat medium grey background, no text</pre>
   </section>
 
-  <section class="note">
-    <h3>Cosa posso fare e cosa no</h3>
-    <p>L'immagine che mi hai mandato è pittura digitale da carta collezionabile, fatta a mano da un illustratore. Disegnando con forme vettoriali non arrivo a quel livello. Posso fare cavalieri curati come questi e animarli bene nel codice.</p>
-    <p>Per avere esattamente quella qualità ci sono due strade. La prima è commissionare il personaggio a un illustratore di pixel art o di sprite 2D, dandogli questa pagina come riferimento (indicativamente 100–400 € per un personaggio animato). La seconda è un pacchetto di sprite "dark knight" con licenza commerciale. In entrambi i casi il codice del gioco non cambia: sostituisco il disegno e basta.</p>
+  <section>
+    <h3>Come si arriva al gioco</h3>
+    <ol>
+      <li>Scegli la variante e generala con uno strumento a tua scelta (Midjourney, Leonardo, ChatGPT, Stable Diffusion). Fai qualche tentativo e tieni quella che ti piace.</li>
+      <li>Con l'immagine scelta come riferimento, genera il foglio personaggio qui sopra. Serve una vista laterale pulita su sfondo uniforme.</li>
+      <li>Mandami l'immagine. Scontorno lo sfondo, la divido in pezzi (elmo, busto, braccia, gambe, arma, mantello) e la animo nel codice: attesa, camminata, attacco, parata, colpito, morte.</li>
+    </ol>
+    <p><strong>Da sapere.</strong> I generatori faticano a disegnare lo stesso personaggio identico in pose diverse. Per questo conviene una sola immagine pulita da animare a pezzi, invece di chiedere ogni fotogramma. Prima di pubblicare controlla nei termini d'uso dello strumento che l'uso commerciale sia permesso; con molti strumenti dipende dal piano. Infine, non scrivere "Force of Will" o il nome di un artista nel prompt: rischieresti un'immagine troppo simile a un'opera protetta.</p>
   </section>
 </div>
 
 <script>
 (function () {
-  var NS = "http://www.w3.org/2000/svg";
-  var STROKE = "#08070a";
-
-  // parte: [d, fill, opzioni]  fill "a","a2","t","g","c" = variabili di palette
-  function P(d, fill, o) { o = o || {}; o.d = d; o.fill = fill; return o; }
-  var V = function (k) { return "var(--" + k + ")"; };
-
-  function draw(parent, parts) {
-    parts.forEach(function (p) {
-      if (p.g) { var g = document.createElementNS(NS, "g"); g.setAttribute("transform", p.g); parent.appendChild(g); draw(g, p.parts); return; }
-      var el = document.createElementNS(NS, "path");
-      el.setAttribute("d", p.d);
-      var fill = p.fill === "none" ? "none" : (/^#/.test(p.fill) || /^url/.test(p.fill) ? p.fill : V(p.fill));
-      el.style.fill = fill;
-      el.style.stroke = p.stroke ? (/^#/.test(p.stroke) ? p.stroke : V(p.stroke)) : (p.fill === "none" ? "none" : STROKE);
-      el.style.strokeWidth = p.sw || 1.4;
-      el.style.strokeLinejoin = "round";
-      el.style.strokeLinecap = "round";
-      if (p.op) el.style.opacity = p.op;
-      if (p.filter) el.setAttribute("filter", "url(#" + p.filter + ")");
-      parent.appendChild(el);
-      if (p.shade) { var s = document.createElementNS(NS, "path"); s.setAttribute("d", p.d); s.style.fill = "url(#shadeR)"; s.style.opacity = p.shade; parent.appendChild(s); }
-      if (p.hl) { var h = document.createElementNS(NS, "path"); h.setAttribute("d", p.d); h.style.fill = "url(#hl)"; parent.appendChild(h); }
-    });
-  }
-
-  // ---------- parti comuni ----------
-  var cape = [
-    P("M114 92 C 84 66, 44 58, 8 76 L 26 86 L 6 98 C 26 104, 22 118, 34 124 L 10 138 C 30 146, 26 162, 14 178 L 34 176 L 26 198 C 52 192, 62 206, 58 228 C 80 206, 96 192, 108 168 Z", "c", { sw: 1.2 }),
-    P("M114 92 C 84 66, 44 58, 8 76 L 26 86 L 6 98 C 26 104, 22 118, 34 124 L 10 138 C 30 146, 26 162, 14 178 L 34 176 L 26 198 C 52 192, 62 206, 58 228 C 80 206, 96 192, 108 168 Z", "url(#capeFade)", { stroke: "none" }),
-    P("M100 96 C 70 90, 50 100, 30 118 M104 120 C 80 120, 60 140, 40 168 M106 150 C 90 160, 76 180, 66 204", "none", { stroke: "#000", sw: 1.4, op: .6 })
+  var BASE = "full body side view of a {who}, facing right, crouched aggressive combat stance with one clawed gauntlet forward, {armor}, {helm}, {weapon}, {cape}, {fx}, realistic painterly digital art, dark fantasy trading card game illustration quality, highly detailed ornate sculpted plate armor, dramatic rim lighting, cinematic, isolated on a plain flat dark grey background, entire figure and weapon visible, no text";
+  var V = [
+    { name: "Cremisi Infernale", c1: "#a8222c", c2: "#ff6a2a", sw: ["#a8222c", "#5c0f16", "#c9a050", "#ff6a2a"],
+      look: "Rosso sangue laccato, fiamme e nebbia viola. La più vicina alla tua immagine.",
+      helm_it: "Corna che salgono piegate all'indietro, visiera a becco con fessura incandescente",
+      weapon_it: "Lancia lunga tenuta di traverso",
+      p: { who: "demonic knight", armor: "glossy blood-red lacquered spiked plate armor with dark gold filigree", helm: "beaked visor helmet with a glowing orange eye slit and two long horns sweeping upward and back", weapon: "holding a long slender spear diagonally across the body", cape: "tattered dark cape dissolving into red and orange flames", fx: "floating rock debris and embers, violet fog" } },
+    { name: "Ossidiana Spettrale", c1: "#2c2b36", c2: "#9a7bff", sw: ["#3a3a46", "#17161d", "#9b93b8", "#9a7bff"],
+      look: "Acciaio quasi nero con riflessi freddi, fuoco d'anima viola nelle giunture.",
+      helm_it: "Corona di punte irregolari, visiera a T che emana luce viola",
+      weapon_it: "Spadone con rune accese, puntato in basso verso il nemico",
+      p: { who: "undead dark knight", armor: "black obsidian plate armor with cold steel highlights and violet soul fire glowing through the joints", helm: "closed helmet crowned with jagged black spikes, T-shaped visor emitting violet light", weapon: "holding a massive greatsword with glowing violet runes, point lowered toward the enemy", cape: "ragged black cape turning into violet ghostly smoke", fx: "violet sparks, faint spectral mist" } },
+    { name: "Bronzo dell'Abisso", c1: "#8a6532", c2: "#62ff9f", sw: ["#8a6532", "#3f2c14", "#5fae8f", "#62ff9f"],
+      look: "Bronzo antico mangiato dal verderame, come riemerso da una tomba. Fiamma verde.",
+      helm_it: "Cresta a pinna all'indietro, paramascella sporgente come una mandibola",
+      weapon_it: "Falcione dalla lama enorme e ricurva",
+      p: { who: "ancient cursed knight", armor: "dark weathered bronze plate armor corroded with turquoise verdigris, engraved patterns", helm: "helmet with a tall swept-back fin crest and a protruding jaw-like mandible guard, glowing green eyes", weapon: "wielding a long glaive with a huge curved blade", cape: "torn moss-green cape fraying into green ghost fire", fx: "green embers, crumbling stone, drifting dust" } },
+    { name: "Argento Corrotto", c1: "#9aa0aa", c2: "#ff2e3e", sw: ["#9aa0aa", "#3e434c", "#7a1e22", "#ff2e3e"],
+      look: "Argento ossidato con venature rosso sangue, mantello nero come fumo.",
+      helm_it: "Corna da toro rivolte in avanti, occhi rossi",
+      weapon_it: "Falce da guerra, la sagoma più minacciosa",
+      p: { who: "corrupted paladin", armor: "tarnished dark silver plate armor with cracks of glowing blood-red veins", helm: "helmet with thick bull horns curving forward, piercing red eyes", weapon: "holding a war scythe with a long curved blade", cape: "heavy black cape dissolving into black smoke", fx: "red sparks, falling ash" } },
+    { name: "Cavaliere di Cenere", c1: "#2a262d", c2: "#ff7a1a", sw: ["#2a262d", "#141116", "#7a6450", "#ff7a1a"],
+      look: "Carbone e lava: crepe arancioni come metallo appena uscito dalla forgia.",
+      helm_it: "Elmo a becco con corna da drago piegate all'indietro, visiera a V",
+      weapon_it: "Spadone spezzato trascinato a terra",
+      p: { who: "knight of ash and fire", armor: "charred black plate armor with molten orange cracks glowing like a forge", helm: "beaked helmet with swept-back dragon horns and a V-shaped glowing visor", weapon: "dragging a broken jagged greatsword along the ground, sparks flying", cape: "burnt cape crumbling into glowing ash", fx: "falling ash, rising embers, heat haze" } },
+    { name: "Sentinella Glaciale", c1: "#3b5466", c2: "#62e3ff", sw: ["#3b5466", "#1a2129", "#9fb0bf", "#62e3ff"],
+      look: "Acciaio blu brinato con cristalli di ghiaccio e nebbia fredda. Stacca bene su sfondi caldi.",
+      helm_it: "Elmo a teschio di lupo con zanne, collare di pelliccia",
+      weapon_it: "Alabarda incrostata di ghiaccio",
+      p: { who: "frost cursed knight", armor: "frost-covered steel-blue plate armor with jagged ice crystals growing from the shoulders", helm: "wolf skull shaped helmet with fangs, fur mantle collar, glowing ice-blue eyes", weapon: "wielding a halberd encrusted with ice", cape: "tattered pale cape freezing into ice shards", fx: "cold blue mist, drifting snow" } }
   ];
-  var backLeg = [
-    P("M104 164 L128 172 L104 230 L80 220 Z", "a", { shade: .55 }),
-    P("M80 224 L100 232 L68 282 L52 272 Z", "a", { shade: .55 }),
-    P("M52 270 L70 280 Q80 284 88 292 L42 292 Q42 280 52 270 Z", "a2"),
-    P("M80 212 L100 220 L100 236 L84 238 L76 228 L66 216 Z", "a2", { shade: .3 })
-  ];
-  var farArm = [
-    P("M140 94 L160 100 L176 122 L164 128 Z", "a", { shade: .55 }),
-    P("M164 112 L182 110 L198 126 L184 136 Z", "a", { shade: .45 }),
-    P("M168 108 L186 94 L180 116 Z", "a2")
-  ];
-  var farFist = [P("M184 116 Q198 112 204 122 Q204 134 190 136 Q180 132 184 116 Z", "a2", { hl: true })];
-  var body = [
-    P("M118 162 L150 160 L152 200 L146 238 L139 214 L133 248 L126 216 L118 238 L114 200 Z", "c", { shade: .35 }),
-    P("M110 160 L128 164 L122 196 L100 188 Z", "a", { shade: .45 }),
-    P("M108 98 Q132 84 158 96 Q168 122 158 150 Q140 160 116 156 Q104 130 108 98 Z", "a", { hl: true }),
-    P("M134 92 Q141 120 138 152", "none", { stroke: "t", sw: 1.6 }),
-    P("M114 118 Q132 110 157 116", "none", { stroke: "t", sw: 1.4 }),
-    P("M120 129 Q133 124 151 129 M123 141 Q136 136 151 141", "none", { stroke: "g", sw: 1.6, filter: "glow" }),
-    P("M114 150 Q138 160 160 148 L162 158 Q138 170 112 160 Z", "a", { hl: true }),
-    P("M112 160 Q138 170 162 158 L163 167 Q138 179 112 169 Z", "a2"),
-    P("M114 150 Q138 160 160 148", "none", { stroke: "t", sw: 1.4 })
-  ];
-  var frontLeg = [
-    P("M128 168 L154 166 L174 200 L152 216 Z", "a", { hl: true }),
-    P("M156 214 L177 210 L183 276 L166 280 Z", "a", { hl: true }),
-    P("M168 216 L174 274", "none", { stroke: "t", sw: 1.3 }),
-    P("M163 272 L185 270 Q200 280 218 292 L158 292 Z", "a2", { hl: true }),
-    P("M182 274 L186 292 M196 282 L198 292", "none", { stroke: STROKE, sw: 1 }),
-    P("M150 196 L174 192 L182 206 L170 222 L150 216 Z", "a2", { hl: true }),
-    P("M174 194 L196 190 L182 206 Z", "a2"),
-    P("M140 158 L166 156 L176 188 L152 198 Z", "a", { hl: true }),
-    P("M152 198 L176 188", "none", { stroke: "t", sw: 1.6 })
-  ];
-  var gorget = [P("M126 86 Q142 80 156 88 L158 100 Q142 106 124 100 Z", "a2")];
-  var pauldron = [
-    P("M94 106 Q96 82 122 78 Q142 82 142 104 Q126 118 96 118 Z", "a", { hl: true }),
-    P("M96 116 Q120 124 142 104 L144 112 Q122 132 98 126 Z", "a2"),
-    P("M94 106 Q96 82 122 78 Q142 82 142 104", "none", { stroke: "t", sw: 1.6 })
-  ];
-  var nearArm = [
-    P("M106 116 L124 114 L130 140 L112 144 Z", "a", { shade: .3 }),
-    P("M118 136 L132 130 L160 150 L150 164 Z", "a", { hl: true }),
-    P("M110 134 L128 136 L126 150 L112 150 L100 154 Z", "a2"),
-    P("M148 146 Q162 142 168 152 L176 158 L166 159 L171 168 L161 165 L161 174 L153 166 Q144 162 148 146 Z", "a2", { hl: true })
-  ];
-  var helmBase = P("M126 78 Q122 54 140 46 Q158 44 166 60 L172 76 Q164 88 150 92 L130 90 Z", "a", { hl: true });
-
-  // ---------- varianti ----------
-  var VAR = {
-    brace: {
-      back: [],
-      weapon: [{ g: "translate(193 128) rotate(-26)", parts: [
-        P("M-3 -22 L3 -22 L3 6 L-3 6 Z", "#2b1d14"),
-        P("M0 -33 L5 -22 L-5 -22 Z", "a2"),
-        P("M-7 14 L7 14 L9 40 L6 46 L9 72 L6 78 L8 110 L0 152 L-8 110 L-6 78 L-9 72 L-6 46 L-9 40 Z", "a", { hl: true }),
-        P("M0 18 L0 140", "none", { stroke: "g", sw: 2, filter: "glow" }),
-        P("M-21 3 L-6 9 L6 9 L21 3 L15 15 L-15 15 Z", "a2", { hl: true })
-      ] }],
-      spikes: [P("M102 90 L90 60 L113 84 Z", "a2", { hl: true }), P("M116 82 L115 50 L129 81 Z", "a2", { hl: true })],
-      helm: [
-        P("M132 54 C 114 40, 92 40, 70 52 C 92 50, 108 56, 126 67 Z", "a2", { hl: true }),
-        P("M138 48 C 128 26, 108 16, 88 16 C 106 26, 120 36, 130 56 Z", "a2", { hl: true }),
-        helmBase,
-        P("M140 46 Q153 52 161 66", "none", { stroke: "t", sw: 1.4 }),
-        P("M146 64 L169 67 L152 73 Z", "g", { stroke: "none", filter: "glow" }),
-        P("M134 80 Q150 82 166 80", "none", { stroke: "g", sw: 1.2, filter: "glow", op: .8 })
-      ]
-    },
-    cremisi: {
-      back: [
-        P("M18 216 L246 92", "none", { stroke: "#140a0e", sw: 6 }),
-        P("M18 216 L246 92", "none", { stroke: "t", sw: 1.2, op: .5 })
-      ],
-      weapon: [
-        P("M236 98 L245 91 Q261 68 258 38 Q250 63 230 84 Z", "a", { hl: true }),
-        P("M245 91 Q260 68 258 40", "none", { stroke: "g", sw: 1.8, filter: "glow" }),
-        P("M228 102 L238 94 L242 100 L232 108 Z", "t"),
-        P("M18 216 L6 226 L22 210 Z", "a2")
-      ],
-      spikes: [P("M96 104 C 80 90, 74 74, 80 58 C 90 78, 104 86, 120 84 Z", "a2", { hl: true }), P("M80 58 C 90 78, 104 86, 120 84", "none", { stroke: "t", sw: 1.3 })],
-      helm: [
-        P("M128 56 L117 33 L134 50 L134 22 L142 46 L151 20 L153 46 L166 31 L161 57 Z", "a2", { hl: true }),
-        helmBase,
-        P("M126 72 Q148 69 171 74", "none", { stroke: "t", sw: 1.6 }),
-        P("M150 61 L170 63 L170 66.5 L160 66.5 L158.5 80 L155 80 L155 66.5 L150 66.5 Z", "g", { stroke: "none", filter: "glow" })
-      ]
-    },
-    spettro: {
-      back: [],
-      weapon: [
-        P("M189 152 L195 152 L197 32 L191 32 Z", "#2b1d14"),
-        P("M191 32 L194 15 L197 32 Z", "a2"),
-        P("M190 46 L172 52 L190 59 Z", "a2", { hl: true }),
-        P("M196 44 Q238 32 247 72 Q232 63 214 67 Q206 78 197 80 Z", "a", { hl: true }),
-        P("M238 42 Q248 56 247 71", "none", { stroke: "g", sw: 1.8, filter: "glow" })
-      ],
-      spikes: [],
-      helm: [
-        P("M128 56 L102 40 L122 64 Z", "a2", { hl: true }),
-        P("M134 50 L116 24 L137 46 Z", "a2", { hl: true }),
-        P("M124 78 Q120 52 140 44 Q160 42 168 58 L189 70 Q183 80 168 84 Q160 92 148 94 L128 90 Z", "a", { hl: true }),
-        P("M140 44 Q158 50 170 60 L189 70", "none", { stroke: "t", sw: 1.3 }),
-        P("M150 58 L167 62 L152 65 Z", "g", { stroke: "none", filter: "glow" }),
-        P("M168 84 L170 93 L174 83 Z M160 88 L161 97 L165 87 Z", "#e9eef3", { sw: .8 })
-      ],
-      ruff: [P("M118 96 L110 86 L122 88 L119 79 L130 86 L134 76 L141 86 L149 79 L151 89 L162 87 L157 99 Z", "#59626d", { hl: true })]
-    }
-  };
-
-  // braci / particelle (posizioni fisse)
-  var EMBERS = [[30, 60, 1.6], [58, 40, 1.1], [210, 40, 1.4], [232, 150, 1.2], [20, 150, 1.3], [80, 30, 1], [240, 200, 1.6], [12, 240, 1.1], [200, 250, 1.2], [70, 250, 1]];
-
-  function knight(svg, key, small) {
-    var v = VAR[key];
-    if (!small) {
-      var halo = document.createElementNS(NS, "ellipse");
-      halo.setAttribute("cx", 140); halo.setAttribute("cy", 150); halo.setAttribute("rx", 90); halo.setAttribute("ry", 110);
-      halo.style.fill = V("g"); halo.style.opacity = .12; halo.setAttribute("filter", "url(#soft)");
-      svg.appendChild(halo);
-    }
-    draw(svg, [P("M30 292 Q130 280 236 292 L236 296 L30 296 Z", "#000", { stroke: "none", op: .55 })]);
-    draw(svg, cape);
-    draw(svg, v.back);
-    draw(svg, backLeg);
-    draw(svg, farArm);
-    draw(svg, v.weapon);
-    draw(svg, farFist);
-    draw(svg, body);
-    draw(svg, frontLeg);
-    draw(svg, gorget);
-    if (v.ruff) draw(svg, v.ruff);
-    draw(svg, v.helm);
-    draw(svg, v.spikes);
-    draw(svg, pauldron);
-    draw(svg, nearArm);
-    if (!small) EMBERS.forEach(function (e) {
-      var c = document.createElementNS(NS, "circle");
-      c.setAttribute("cx", e[0]); c.setAttribute("cy", e[1]); c.setAttribute("r", e[2]);
-      c.style.fill = V("g"); c.setAttribute("filter", "url(#glow)");
-      svg.appendChild(c);
-    });
-  }
-
-  document.querySelectorAll("svg[data-knight]").forEach(function (svg) { knight(svg, svg.getAttribute("data-knight"), false); });
-
-  var strip = document.getElementById("strip");
-  [["brace", 110, "v-brace"], ["cremisi", 350, "v-cremisi"], ["spettro", 590, "v-spettro"]].forEach(function (k) {
-    var s = document.createElementNS(NS, "svg");
-    s.setAttribute("x", k[1]); s.setAttribute("y", 100); s.setAttribute("width", 87); s.setAttribute("height", 100);
-    s.setAttribute("viewBox", "0 0 260 300"); s.setAttribute("class", k[2]); s.setAttribute("overflow", "visible");
-    strip.appendChild(s);
-    knight(s, k[0], true);
+  function fill(t, p) { return t.replace(/\{(\w+)\}/g, function (_, k) { return p[k]; }); }
+  var root = document.getElementById("cards");
+  V.forEach(function (v, i) {
+    var id = "p" + i;
+    var a = document.createElement("article");
+    a.className = "card";
+    a.style.setProperty("--c1", v.c1); a.style.setProperty("--c2", v.c2);
+    a.innerHTML =
+      '<span class="tag">Variante ' + (i + 1) + '</span>' +
+      '<h2>' + v.name + '</h2>' +
+      '<div class="swatches">' + v.sw.map(function (c) { return '<i style="background:' + c + '"></i>'; }).join("") + '</div>' +
+      '<dl><dt>Aspetto</dt><dd>' + v.look + '</dd><dt>Elmo</dt><dd>' + v.helm_it + '</dd><dt>Arma</dt><dd>' + v.weapon_it + '</dd></dl>' +
+      '<div class="row"><span>Prompt</span><button type="button" data-copy="' + id + '">Copia</button></div>' +
+      '<pre id="' + id + '"></pre>';
+    root.appendChild(a);
+    document.getElementById(id).textContent = fill(BASE, v.p);
+  });
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-copy]");
+    if (!b) return;
+    var pre = document.getElementById(b.getAttribute("data-copy"));
+    var done = function () { b.textContent = "Copiato"; setTimeout(function () { b.textContent = "Copia"; }, 1500); };
+    var select = function () { var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = "Selezionato"; };
+    try { navigator.clipboard.writeText(pre.textContent).then(done, select); } catch (err) { select(); }
   });
 })();
 </script>
