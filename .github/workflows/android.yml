@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       HAS_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 != '' }}
     steps:
@@ -30,6 +32,18 @@ jobs:
         with:
           name: last-line-debug-apk
           path: android/app/build/outputs/apk/debug/*.apk
+
+      # Pubblica l'APK come release "test-build": si scarica direttamente dal telefono
+      - name: Publish test APK
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk last-line.apk
+          gh release delete test-build --yes --cleanup-tag || true
+          gh release create test-build last-line.apk --prerelease --target "${{ github.sha }}" \
+            --title "Last Line - versione di prova" \
+            --notes "APK di debug da installare direttamente sul telefono Android. Commit ${{ github.sha }}"
 
       # Release AAB firmato per il Play Store: parte solo se i secret sono configurati
       - name: Decode keystore
